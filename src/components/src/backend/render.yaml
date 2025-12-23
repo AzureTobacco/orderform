@@ -3,11 +3,10 @@ services:
     name: azure-tobacco-api
     env: node
     plan: free
+    region: oregon
     rootDir: src/components/src/backend
     buildCommand: npm install
     startCommand: npm start
-    dockerCommand: ""
-    dockerfilePath: ""
     envVars:
       - key: NODE_ENV
         value: production
