@@ -16,9 +16,5 @@ services:
         sync: false
       - key: DB_PATH
         value: ./database/orders.db
-
-
-
-
-
-
+    dockerfilePath: ""
+    dockerContext: ""
