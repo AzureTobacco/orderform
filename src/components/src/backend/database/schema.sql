@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     order_id INTEGER NOT NULL,
     product_name TEXT NOT NULL,
     product_code TEXT,
+    product_range TEXT,
+    packaging TEXT,
     quantity INTEGER NOT NULL DEFAULT 1,
     unit_price REAL NOT NULL DEFAULT 0,
     total_price REAL NOT NULL DEFAULT 0,

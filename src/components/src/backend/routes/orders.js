@@ -5,7 +5,91 @@ const { body, validationResult } = require('express-validator');
 
 const router = express.Router();
 
-// All order routes require authentication
+// Public endpoint for submitting orders (no auth required)
+router.post('/public', [
+    body('customerName').notEmpty().withMessage('Customer name is required'),
+    body('orderDate').notEmpty().withMessage('Order date is required'),
+    body('items').isArray().withMessage('Items must be an array'),
+    body('distributorName').notEmpty().withMessage('Distributor name is required')
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        
+        const {
+            customerName, customerCode, customerEmail, customerPhone, customerAddress,
+            orderDate, deliveryDate, items, tax, discount, notes, status,
+            distributorName, distributorEmail, distributorPhone, distributorAddress
+        } = req.body;
+        
+        // Calculate totals
+        const subtotal = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+        const total = subtotal + (tax || 0) - (discount || 0);
+        
+        // Find or create distributor user
+        let distributorUser = await dbHelpers.getUserByUsername(`dist_${distributorName.toLowerCase().replace(/\s+/g, '_')}`);
+        
+        if (!distributorUser) {
+            // Create a new distributor user
+            const bcrypt = require('bcryptjs');
+            const username = `dist_${distributorName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+            const passwordHash = bcrypt.hashSync(Math.random().toString(36), 10);
+            
+            distributorUser = await dbHelpers.createUser({
+                username,
+                passwordHash,
+                role: 'distributor',
+                distributorName,
+                email: distributorEmail,
+                phone: distributorPhone,
+                address: distributorAddress
+            });
+        }
+        
+        // Create order
+        const orderData = {
+            orderNumber: generateOrderNumber(),
+            userId: distributorUser.id,
+            customerName,
+            customerCode,
+            customerEmail,
+            customerPhone,
+            customerAddress,
+            orderDate,
+            deliveryDate,
+            subtotal,
+            tax: tax || 0,
+            discount: discount || 0,
+            total,
+            status: status || 'submitted',
+            notes
+        };
+        
+        const order = await dbHelpers.createOrder(orderData);
+        
+        // Create order items
+        if (items && items.length > 0) {
+            await dbHelpers.createOrderItems(order.id, items);
+        }
+        
+        // Get full order with items
+        const fullOrder = await dbHelpers.getOrderById(order.id);
+        const orderItems = await dbHelpers.getOrderItems(order.id);
+        
+        res.status(201).json({
+            ...fullOrder,
+            items: orderItems,
+            message: 'Order submitted successfully'
+        });
+    } catch (error) {
+        console.error('Public order submission error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// All other order routes require authentication
 router.use(authenticateToken);
 
 // Generate order number

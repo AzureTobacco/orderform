@@ -248,7 +248,7 @@ const dbHelpers = {
             }
             
             const stmt = db.prepare(
-                'INSERT INTO order_items (order_id, product_name, product_code, quantity, unit_price, total_price, notes) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO order_items (order_id, product_name, product_code, product_range, packaging, quantity, unit_price, total_price, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
             
             items.forEach(item => {
@@ -256,6 +256,8 @@ const dbHelpers = {
                     orderId,
                     item.productName,
                     item.productCode || null,
+                    item.range || null,
+                    item.packaging || null,
                     item.quantity,
                     item.unitPrice,
                     item.totalPrice,

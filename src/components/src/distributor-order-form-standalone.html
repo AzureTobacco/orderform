@@ -37,6 +37,10 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // API Configuration - Set this to your backend URL (leave empty to use localStorage only)
+        const API_BASE_URL = window.API_BASE_URL || ''; // e.g., 'http://localhost:3000/api' or 'https://your-backend.com/api'
+        const USE_API = API_BASE_URL.length > 0;
+
         // Order Storage Utilities
         const STORAGE_KEY_ORDERS = 'azure_tobacco_distributor_orders';
         const STORAGE_KEY_DISTRIBUTOR = 'azure_tobacco_distributor_info';
@@ -204,7 +208,7 @@
                 alert('Order saved as draft!');
             };
 
-            const handleSubmit = () => {
+            const handleSubmit = async () => {
                 if (!customerName.trim()) {
                     alert('Please enter customer name');
                     return;
@@ -215,9 +219,13 @@
                     return;
                 }
 
-                const order = {
-                    id: generateOrderId(),
-                    orderNumber: generateOrderNumber(),
+                if (!distributorInfo || !distributorInfo.name) {
+                    alert('Please set up distributor information first');
+                    setShowDistributorSetup(true);
+                    return;
+                }
+
+                const orderData = {
                     customerName: customerName.trim(),
                     customerCode: customerCode.trim() || undefined,
                     customerEmail: customerEmail.trim() || undefined,
@@ -225,21 +233,107 @@
                     customerAddress: customerAddress.trim() || undefined,
                     orderDate,
                     deliveryDate: deliveryDate || undefined,
-                    items: items.filter(item => item.productName.trim() !== ''),
+                    items: items.filter(item => item.productName.trim() !== '').map(item => ({
+                        productName: item.productName,
+                        range: item.range || undefined,
+                        packaging: item.packaging || undefined,
+                        quantity: item.quantity,
+                        unitPrice: item.unitPrice,
+                        totalPrice: item.totalPrice
+                    })),
                     subtotal: calculateSubtotal(),
-                    tax: tax || undefined,
-                    discount: discount || undefined,
+                    tax: tax || 0,
+                    discount: discount || 0,
                     total: calculateTotal(),
                     status: 'submitted',
                     notes: notes.trim() || undefined,
-                    distributorId: distributorInfo?.id,
-                    distributorName: distributorInfo?.name,
+                    distributorName: distributorInfo.name,
+                    distributorEmail: distributorInfo.email,
+                    distributorPhone: distributorInfo.phone,
+                    distributorAddress: distributorInfo.address
+                };
+
+                // Try to submit to API if configured
+                if (USE_API) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/orders/public`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(orderData)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            // Also save to localStorage as backup
+                            const order = {
+                                id: generateOrderId(),
+                                orderNumber: result.order_number || generateOrderNumber(),
+                                ...orderData,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            };
+                            saveOrder(order);
+                            alert('Order submitted successfully to server!');
+                            
+                            // Reset form
+                            setCustomerName('');
+                            setCustomerCode('');
+                            setCustomerEmail('');
+                            setCustomerPhone('');
+                            setCustomerAddress('');
+                            setOrderDate(new Date().toISOString().split('T')[0]);
+                            setDeliveryDate('');
+                            setItems([]);
+                            setNotes('');
+                            setTax(0);
+                            setDiscount(0);
+                            return;
+                        } else {
+                            throw new Error(result.error || 'Failed to submit order');
+                        }
+                    } catch (error) {
+                        console.error('API submission error:', error);
+                        // Fallback to localStorage
+                        const order = {
+                            id: generateOrderId(),
+                            orderNumber: generateOrderNumber(),
+                            ...orderData,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        };
+                        saveOrder(order);
+                        alert('Order saved locally (server unavailable). Order will be synced when server is available.');
+                        
+                        // Reset form
+                        setCustomerName('');
+                        setCustomerCode('');
+                        setCustomerEmail('');
+                        setCustomerPhone('');
+                        setCustomerAddress('');
+                        setOrderDate(new Date().toISOString().split('T')[0]);
+                        setDeliveryDate('');
+                        setItems([]);
+                        setNotes('');
+                        setTax(0);
+                        setDiscount(0);
+                        return;
+                    }
+                }
+
+                // Fallback to localStorage only
+                const order = {
+                    id: generateOrderId(),
+                    orderNumber: generateOrderNumber(),
+                    ...orderData,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
 
                 saveOrder(order);
-                alert('Order submitted successfully!');
+                alert('Order saved locally! (API not configured)');
                 
                 // Reset form
                 setCustomerName('');

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Tobacco - Admin Dashboard</title>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a0d1a 0%, #161b2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        #root { 
+            min-height: 100vh; 
+            padding: 2rem;
+        }
+        input, textarea, select, button {
+            font-family: inherit;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #00d4ff;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Configuration - Update this with your backend API URL
+        const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000/api';
+        
+        // Admin Dashboard Component
+        const AdminDashboard = () => {
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [token, setToken] = useState(localStorage.getItem('admin_token'));
+            const [orders, setOrders] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+            const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+            const [viewMode, setViewMode] = useState('all'); // 'all', 'monthly'
+            const [monthlyReport, setMonthlyReport] = useState(null);
+
+            useEffect(() => {
+                if (token) {
+                    setIsAuthenticated(true);
+                    fetchOrders();
+                }
+            }, [token]);
+
+            const handleLogin = async () => {
+                setLoading(true);
+                setError('');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.token) {
+                        setToken(data.token);
+                        localStorage.setItem('admin_token', data.token);
+                        setIsAuthenticated(true);
+                        fetchOrders();
+                    } else {
+                        setError(data.error || 'Login failed');
+                    }
+                } catch (err) {
+                    setError('Failed to connect to server. Make sure the backend is running.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleLogout = () => {
+                setToken(null);
+                localStorage.removeItem('admin_token');
+                setIsAuthenticated(false);
+                setOrders([]);
+            };
+
+            const fetchOrders = async () => {
+                setLoading(true);
+                setError('');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/orders/all`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        setOrders(data);
+                    } else if (response.status === 401) {
+                        handleLogout();
+                        setError('Session expired. Please login again.');
+                    } else {
+                        setError('Failed to fetch orders');
+                    }
+                } catch (err) {
+                    setError('Failed to connect to server. Make sure the backend is running.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const fetchMonthlyReport = async () => {
+                setLoading(true);
+                setError('');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/orders/reconciliation/${selectedMonth}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        setMonthlyReport(data);
+                    } else if (response.status === 401) {
+                        handleLogout();
+                        setError('Session expired. Please login again.');
+                    } else {
+                        setError('Failed to fetch monthly report');
+                    }
+                } catch (err) {
+                    setError('Failed to connect to server.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(amount || 0);
+            };
+
+            const formatDate = (dateString) => {
+                if (!dateString) return 'N/A';
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            };
+
+            if (!isAuthenticated) {
+                return (
+                    <div style={{
+                        minHeight: '100vh',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '2rem'
+                    }}>
+                        <div style={{
+                            background: 'rgba(31, 38, 55, 0.9)',
+                            borderRadius: '16px',
+                            padding: '3rem',
+                            maxWidth: '400px',
+                            width: '100%',
+                            border: '1px solid rgba(0, 212, 255, 0.3)'
+                        }}>
+                            <h1 style={{
+                                color: '#00d4ff',
+                                marginBottom: '2rem',
+                                textAlign: 'center',
+                                fontSize: '2rem'
+                            }}>
+                                Admin Login
+                            </h1>
+                            {error && (
+                                <div style={{
+                                    padding: '1rem',
+                                    background: 'rgba(244, 67, 54, 0.2)',
+                                    border: '1px solid rgba(244, 67, 54, 0.5)',
+                                    borderRadius: '8px',
+                                    color: '#f44336',
+                                    marginBottom: '1rem'
+                                }}>
+                                    {error}
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                        Username
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                        Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleLogin}
+                                    disabled={loading}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        background: loading ? 'rgba(0, 212, 255, 0.5)' : 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: loading ? 'not-allowed' : 'pointer',
+                                        marginTop: '1rem'
+                                    }}
+                                >
+                                    {loading ? 'Logging in...' : 'Login'}
+                                </button>
+                            </div>
+                            <div style={{
+                                marginTop: '2rem',
+                                padding: '1rem',
+                                background: 'rgba(0, 0, 0, 0.2)',
+                                borderRadius: '8px',
+                                fontSize: '0.9rem',
+                                color: 'rgba(255,255,255,0.6)'
+                            }}>
+                                <strong>Note:</strong> Make sure your backend API is running and accessible at: {API_BASE_URL}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div style={{
+                    minHeight: '100vh',
+                    background: 'linear-gradient(135deg, #0a0d1a 0%, #161b2e 100%)',
+                    padding: '2rem',
+                    color: '#ffffff'
+                }}>
+                    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+                        {/* Header */}
+                        <div style={{
+                            marginBottom: '2rem',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '1.5rem',
+                            background: 'rgba(31, 38, 55, 0.6)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(0, 212, 255, 0.2)'
+                        }}>
+                            <h1 style={{
+                                fontSize: '2rem',
+                                color: '#00d4ff'
+                            }}>
+                                Admin Dashboard - Order Management
+                            </h1>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    padding: '0.5rem 1.5rem',
+                                    background: 'rgba(244, 67, 54, 0.2)',
+                                    border: '1px solid rgba(244, 67, 54, 0.5)',
+                                    borderRadius: '8px',
+                                    color: '#f44336',
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Logout
+                            </button>
+                        </div>
+
+                        {/* View Mode Toggle */}
+                        <div style={{
+                            marginBottom: '2rem',
+                            display: 'flex',
+                            gap: '1rem',
+                            alignItems: 'center'
+                        }}>
+                            <button
+                                onClick={() => {
+                                    setViewMode('all');
+                                    fetchOrders();
+                                }}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: viewMode === 'all' ? 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)' : 'rgba(0, 212, 255, 0.2)',
+                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                All Orders
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewMode('monthly');
+                                    fetchMonthlyReport();
+                                }}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: viewMode === 'monthly' ? 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)' : 'rgba(0, 212, 255, 0.2)',
+                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Monthly Report
+                            </button>
+                            {viewMode === 'monthly' && (
+                                <input
+                                    type="month"
+                                    value={selectedMonth}
+                                    onChange={(e) => {
+                                        setSelectedMonth(e.target.value);
+                                        fetchMonthlyReport();
+                                    }}
+                                    style={{
+                                        padding: '0.75rem',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid rgba(0, 212, 255, 0.3)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '1rem'
+                                    }}
+                                />
+                            )}
+                            <button
+                                onClick={viewMode === 'all' ? fetchOrders : fetchMonthlyReport}
+                                style={{
+                                    padding: '0.75rem 1.5rem',
+                                    background: 'rgba(0, 212, 255, 0.2)',
+                                    border: '1px solid rgba(0, 212, 255, 0.5)',
+                                    borderRadius: '8px',
+                                    color: '#00d4ff',
+                                    cursor: 'pointer',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                Refresh
+                            </button>
+                        </div>
+
+                        {error && (
+                            <div style={{
+                                padding: '1rem',
+                                background: 'rgba(244, 67, 54, 0.2)',
+                                border: '1px solid rgba(244, 67, 54, 0.5)',
+                                borderRadius: '8px',
+                                color: '#f44336',
+                                marginBottom: '1rem'
+                            }}>
+                                {error}
+                            </div>
+                        )}
+
+                        {loading && (
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '2rem',
+                                color: 'rgba(255,255,255,0.6)'
+                            }}>
+                                Loading...
+                            </div>
+                        )}
+
+                        {/* Monthly Report View */}
+                        {viewMode === 'monthly' && monthlyReport && !loading && (
+                            <div style={{
+                                background: 'rgba(31, 38, 55, 0.6)',
+                                borderRadius: '16px',
+                                padding: '2rem',
+                                border: '1px solid rgba(0, 212, 255, 0.2)',
+                                marginBottom: '2rem'
+                            }}>
+                                <h2 style={{ color: '#00d4ff', marginBottom: '1.5rem' }}>
+                                    Monthly Report - {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                </h2>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                    gap: '1rem',
+                                    marginBottom: '2rem'
+                                }}>
+                                    <div style={{
+                                        padding: '1.5rem',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(0, 212, 255, 0.2)'
+                                    }}>
+                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Orders</div>
+                                        <div style={{ color: '#00d4ff', fontSize: '2rem', fontWeight: '700' }}>{monthlyReport.totalOrders}</div>
+                                    </div>
+                                    <div style={{
+                                        padding: '1.5rem',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(0, 212, 255, 0.2)'
+                                    }}>
+                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Total Amount</div>
+                                        <div style={{ color: '#00d4ff', fontSize: '2rem', fontWeight: '700' }}>{formatCurrency(monthlyReport.totalAmount)}</div>
+                                    </div>
+                                    <div style={{
+                                        padding: '1.5rem',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(0, 212, 255, 0.2)'
+                                    }}>
+                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Processed</div>
+                                        <div style={{ color: '#4caf50', fontSize: '2rem', fontWeight: '700' }}>{monthlyReport.processedOrders}</div>
+                                    </div>
+                                    <div style={{
+                                        padding: '1.5rem',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(0, 212, 255, 0.2)'
+                                    }}>
+                                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Pending</div>
+                                        <div style={{ color: '#ff9800', fontSize: '2rem', fontWeight: '700' }}>{monthlyReport.pendingOrders}</div>
+                                    </div>
+                                </div>
+                                <h3 style={{ color: '#00d4ff', marginBottom: '1rem' }}>Orders for this month:</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {monthlyReport.orders.map(order => (
+                                        <OrderCard key={order.id} order={order} formatCurrency={formatCurrency} formatDate={formatDate} />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* All Orders View */}
+                        {viewMode === 'all' && !loading && (
+                            <div>
+                                <div style={{
+                                    marginBottom: '1rem',
+                                    color: 'rgba(255,255,255,0.7)'
+                                }}>
+                                    Total Orders: {orders.length}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {orders.length === 0 ? (
+                                        <div style={{
+                                            padding: '3rem',
+                                            textAlign: 'center',
+                                            background: 'rgba(0, 0, 0, 0.2)',
+                                            borderRadius: '8px',
+                                            color: 'rgba(255,255,255,0.5)'
+                                        }}>
+                                            No orders found
+                                        </div>
+                                    ) : (
+                                        orders.map(order => (
+                                            <OrderCard key={order.id} order={order} formatCurrency={formatCurrency} formatDate={formatDate} />
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Order Card Component
+        const OrderCard = ({ order, formatCurrency, formatDate }) => {
+            const [expanded, setExpanded] = useState(false);
+            const [items, setItems] = useState(order.items || []);
+
+            useEffect(() => {
+                if (expanded && (!items || items.length === 0)) {
+                    // Fetch items if not already loaded
+                    fetch(`${API_BASE_URL}/orders/${order.id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => setItems(data.items || []))
+                    .catch(err => console.error('Error fetching items:', err));
+                }
+            }, [expanded, order.id]);
+
+            const getStatusColor = (status) => {
+                switch(status) {
+                    case 'submitted': return '#ff9800';
+                    case 'processed': return '#4caf50';
+                    case 'draft': return 'rgba(255,255,255,0.5)';
+                    default: return '#00d4ff';
+                }
+            };
+
+            return (
+                <div style={{
+                    background: 'rgba(31, 38, 55, 0.6)',
+                    borderRadius: '12px',
+                    padding: '1.5rem',
+                    border: '1px solid rgba(0, 212, 255, 0.2)',
+                    cursor: 'pointer'
+                }}
+                onClick={() => setExpanded(!expanded)}
+                >
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr auto',
+                        gap: '1rem',
+                        alignItems: 'center'
+                    }}>
+                        <div>
+                            <div style={{ color: '#00d4ff', fontWeight: '600', marginBottom: '0.25rem' }}>
+                                {order.order_number || order.orderNumber}
+                            </div>
+                            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem' }}>
+                                {order.customer_name || order.customerName}
+                            </div>
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.8)' }}>
+                            {formatDate(order.order_date || order.orderDate)}
+                        </div>
+                        <div>
+                            <span style={{
+                                padding: '0.25rem 0.75rem',
+                                background: `rgba(${getStatusColor(order.status) === '#ff9800' ? '255, 152, 0' : getStatusColor(order.status) === '#4caf50' ? '76, 175, 80' : '0, 212, 255'}, 0.2)`,
+                                border: `1px solid ${getStatusColor(order.status)}`,
+                                borderRadius: '6px',
+                                color: getStatusColor(order.status),
+                                fontSize: '0.85rem',
+                                fontWeight: '600',
+                                textTransform: 'uppercase'
+                            }}>
+                                {order.status || 'draft'}
+                            </span>
+                        </div>
+                        <div style={{ color: '#00d4ff', fontWeight: '600' }}>
+                            {formatCurrency(order.total)}
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
+                            {items.length || order.items?.length || 0} items
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            {expanded ? '▼' : '▶'}
+                        </div>
+                    </div>
+                    {expanded && (
+                        <div style={{
+                            marginTop: '1.5rem',
+                            paddingTop: '1.5rem',
+                            borderTop: '1px solid rgba(0, 212, 255, 0.2)'
+                        }}>
+                            <div style={{ marginBottom: '1rem', color: 'rgba(255,255,255,0.7)' }}>
+                                <strong>Customer:</strong> {order.customer_name || order.customerName}<br/>
+                                {order.customer_email && <><strong>Email:</strong> {order.customer_email}<br/></>}
+                                {order.customer_phone && <><strong>Phone:</strong> {order.customer_phone}<br/></>}
+                                {order.delivery_date && <><strong>Delivery Date:</strong> {formatDate(order.delivery_date)}<br/></>}
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <strong style={{ color: '#00d4ff' }}>Items:</strong>
+                                <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    {items.map((item, idx) => (
+                                        <div key={idx} style={{
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            borderRadius: '6px',
+                                            display: 'grid',
+                                            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+                                            gap: '0.5rem',
+                                            fontSize: '0.9rem'
+                                        }}>
+                                            <div>
+                                                <div>{item.product_name || item.productName}</div>
+                                                {item.product_range && <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>Range: {item.product_range}</div>}
+                                                {item.packaging && <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>Packaging: {item.packaging}</div>}
+                                            </div>
+                                            <div style={{ color: 'rgba(255,255,255,0.7)' }}>Qty: {item.quantity}</div>
+                                            <div style={{ color: 'rgba(255,255,255,0.7)' }}>Price: {formatCurrency(item.unit_price || item.unitPrice)}</div>
+                                            <div style={{ color: '#00d4ff', fontWeight: '600' }}>{formatCurrency(item.total_price || item.totalPrice)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                paddingTop: '1rem',
+                                borderTop: '1px solid rgba(0, 212, 255, 0.2)'
+                            }}>
+                                <div>
+                                    <div style={{ color: 'rgba(255,255,255,0.7)' }}>Subtotal: {formatCurrency(order.subtotal)}</div>
+                                    {order.tax > 0 && <div style={{ color: 'rgba(255,255,255,0.7)' }}>Tax: {formatCurrency(order.tax)}</div>}
+                                    {order.discount > 0 && <div style={{ color: 'rgba(255,255,255,0.7)' }}>Discount: {formatCurrency(order.discount)}</div>}
+                                </div>
+                                <div style={{ color: '#00d4ff', fontSize: '1.2rem', fontWeight: '700' }}>
+                                    Total: {formatCurrency(order.total)}
+                                </div>
+                            </div>
+                            {order.notes && (
+                                <div style={{
+                                    marginTop: '1rem',
+                                    padding: '0.75rem',
+                                    background: 'rgba(0, 0, 0, 0.3)',
+                                    borderRadius: '6px',
+                                    color: 'rgba(255,255,255,0.7)'
+                                }}>
+                                    <strong>Notes:</strong> {order.notes}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<AdminDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
+
