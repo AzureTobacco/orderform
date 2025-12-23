@@ -144,6 +144,8 @@
                 const newItem = {
                     id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     productName: '',
+                    range: '',
+                    packaging: '',
                     quantity: 1,
                     unitPrice: 0,
                     totalPrice: 0,
@@ -660,7 +662,7 @@
                                             >
                                                 <div style={{
                                                     display: 'grid',
-                                                    gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
+                                                    gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr auto',
                                                     gap: '1rem',
                                                     alignItems: 'center'
                                                 }}>
@@ -678,6 +680,41 @@
                                                             fontSize: '0.9rem'
                                                         }}
                                                     />
+                                                    <select
+                                                        value={item.range || ''}
+                                                        onChange={(e) => updateItem(item.id, 'range', e.target.value)}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            background: 'rgba(0, 0, 0, 0.3)',
+                                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                            borderRadius: '6px',
+                                                            color: '#fff',
+                                                            fontSize: '0.9rem',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        <option value="">Select Range</option>
+                                                        <option value="Gold Line">Gold Line</option>
+                                                        <option value="Black Line">Black Line</option>
+                                                    </select>
+                                                    <select
+                                                        value={item.packaging || ''}
+                                                        onChange={(e) => updateItem(item.id, 'packaging', e.target.value)}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            background: 'rgba(0, 0, 0, 0.3)',
+                                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                            borderRadius: '6px',
+                                                            color: '#fff',
+                                                            fontSize: '0.9rem',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        <option value="">Select Packaging</option>
+                                                        <option value="American 250g">American 250g</option>
+                                                        <option value="American 100g">American 100g</option>
+                                                        <option value="Australian 100g">Australian 100g</option>
+                                                    </select>
                                                     <input
                                                         type="number"
                                                         value={item.quantity}
