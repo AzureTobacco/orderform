@@ -1,0 +1,1003 @@
+/* 🌌 SOPHISTICATED COSMIC ERP THEME - Azure Tobacco Industrial FZCO */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* 🌟 Sophisticated Cosmic Color Palette */
+  --cosmic-deep-space: #0a0a0f;
+  --cosmic-nebula-dark: #1a1a2e;
+  --cosmic-nebula-blue: #16213e;
+  --cosmic-star-white: #ffffff;
+  --cosmic-star-blue: #64b5f6;
+  --cosmic-star-silver: #c0c0c0;
+  --cosmic-accent-cyan: #00d4ff;
+  --cosmic-horizon: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  --cosmic-subtle: linear-gradient(45deg, #1e3c72, #2a5298, #16213e, #1a1a2e);
+  
+  /* 🚀 Elegant Gradients */
+  --cosmic-primary: #00d4ff;
+  --cosmic-secondary: #4a90e2;
+  --cosmic-accent: #64b5f6;
+  --elegant-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #16213e 100%);
+  --subtle-glow: linear-gradient(90deg, #00d4ff 0%, #4a90e2 50%, #64b5f6 100%);
+  
+  /* 📏 Spacing & Typography */
+  --cosmic-font-primary: 'Orbitron', monospace;
+  --cosmic-font-secondary: 'Exo 2', sans-serif;
+  --cosmic-border-radius: 12px;
+  --cosmic-shadow: 0 8px 32px rgba(0, 212, 255, 0.15);
+  --cosmic-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+
+  /* 🎯 Dashboard Variables */
+  --text-primary: #ffffff;
+  --text-secondary: #c0c0c0;
+  --bg-dark: #1a1a2e;
+  --card-bg: rgba(26, 26, 46, 0.85);
+  --border-color: rgba(0, 212, 255, 0.15);
+  --azure-primary: #00d4ff;
+}
+
+/* 🌌 MAIN APP LAYOUT */
+.cosmic-app {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  background: var(--cosmic-deep-space);
+}
+
+/* 🌌 COSMIC BACKGROUND CONTAINER */
+.cosmic-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -10;
+  pointer-events: none;
+}
+
+/* ✨ ANIMATED STARFIELD */
+.cosmic-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(1px 1px at 20px 30px, var(--cosmic-star-white), transparent),
+    radial-gradient(1px 1px at 40px 70px, var(--cosmic-star-blue), transparent),
+    radial-gradient(0.5px 0.5px at 90px 40px, var(--cosmic-star-silver), transparent),
+    radial-gradient(1px 1px at 130px 80px, var(--cosmic-star-white), transparent),
+    radial-gradient(0.5px 0.5px at 160px 30px, var(--cosmic-accent-cyan), transparent),
+    radial-gradient(1px 1px at 200px 60px, var(--cosmic-star-blue), transparent);
+  background-repeat: repeat;
+  background-size: 250px 150px;
+  animation: gentle-twinkle 25s linear infinite;
+  opacity: 0.8;
+}
+
+/* 🌌 COSMIC NEBULA */
+.cosmic-nebula {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(ellipse 1000px 500px at 20% 30%, rgba(30, 60, 114, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 800px 400px at 80% 70%, rgba(42, 82, 152, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 300px at 50% 10%, rgba(100, 181, 246, 0.04) 0%, transparent 60%);
+  animation: subtle-drift 40s ease-in-out infinite alternate;
+}
+
+/* 🌟 ORION'S BELT CONSTELLATION */
+.orion-belt {
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  width: 200px;
+  height: 100px;
+  z-index: -5;
+}
+
+.orion-belt::before,
+.orion-belt::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--cosmic-star-white);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--cosmic-accent-cyan);
+  animation: gentle-pulse 3s ease-in-out infinite alternate;
+}
+
+.orion-belt::before {
+  top: 20px;
+  left: 30px;
+}
+
+.orion-belt::after {
+  top: 60px;
+  right: 40px;
+}
+
+/* 🌟 SIDEBAR LAYOUT */
+.cosmic-sidebar {
+  width: 280px;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(0, 212, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.cosmic-sidebar.closed {
+  width: 80px;
+}
+
+.cosmic-sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cosmic-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cosmic-logo-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--elegant-gradient);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cosmic-logo-text h2 {
+  font-family: var(--cosmic-font-primary);
+  font-size: 1.2rem;
+  color: var(--cosmic-primary);
+  margin: 0;
+}
+
+.cosmic-logo-text p {
+  font-family: var(--cosmic-font-secondary);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.cosmic-sidebar-toggle {
+  background: none;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  color: var(--cosmic-primary);
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cosmic-sidebar-toggle:hover {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: var(--cosmic-primary);
+}
+
+.cosmic-nav {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.cosmic-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--cosmic-font-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cosmic-nav-item:hover {
+  color: var(--cosmic-primary);
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.cosmic-nav-item.active {
+  color: var(--cosmic-primary);
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.cosmic-nav-indicator {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--cosmic-primary);
+  border-radius: 2px;
+}
+
+.cosmic-sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.cosmic-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cosmic-user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--elegant-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.cosmic-user-details {
+  flex: 1;
+}
+
+.cosmic-user-name {
+  font-family: var(--cosmic-font-primary);
+  font-size: 0.9rem;
+  color: var(--cosmic-primary);
+  margin: 0;
+}
+
+.cosmic-user-role {
+  font-family: var(--cosmic-font-secondary);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 🌟 MAIN CONTENT AREA */
+.cosmic-main {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  transition: margin-left 0.3s ease;
+  background: transparent;
+}
+
+.cosmic-main.sidebar-closed {
+  margin-left: 80px;
+}
+
+.cosmic-content {
+  padding: 2rem;
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+
+.cosmic-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  background: transparent;
+}
+
+/* 🌌 Base Cosmic Background */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--cosmic-font-secondary);
+  background: var(--cosmic-deep-space);
+  color: var(--cosmic-star-white);
+  overflow-x: hidden;
+  position: relative;
+  /* Enhanced text rendering for all text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+/* 🌌 Cosmic Background Elements */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -20;
+  background: 
+    radial-gradient(1px 1px at 20px 30px, var(--cosmic-star-white), transparent),
+    radial-gradient(1px 1px at 40px 70px, var(--cosmic-star-blue), transparent),
+    radial-gradient(0.5px 0.5px at 90px 40px, var(--cosmic-star-silver), transparent),
+    radial-gradient(1px 1px at 130px 80px, var(--cosmic-star-white), transparent),
+    radial-gradient(0.5px 0.5px at 160px 30px, var(--cosmic-accent-cyan), transparent),
+    radial-gradient(1px 1px at 200px 60px, var(--cosmic-star-blue), transparent);
+  background-repeat: repeat;
+  background-size: 250px 150px;
+  animation: gentle-twinkle 25s linear infinite;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* 🌌 Cosmic Nebula Background */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -15;
+  background: 
+    radial-gradient(ellipse 1000px 500px at 20% 30%, rgba(30, 60, 114, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 800px 400px at 80% 70%, rgba(42, 82, 152, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 300px at 50% 10%, rgba(100, 181, 246, 0.04) 0%, transparent 60%);
+  animation: subtle-drift 40s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* 🎯 Elegant Orion's Belt Constellation */
+.orion-belt {
+  position: fixed;
+  top: 15%;
+  right: 10%;
+  width: 200px;
+  height: 100px;
+  z-index: -10;
+  pointer-events: none;
+}
+
+.orion-belt::before,
+.orion-belt::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--cosmic-star-white);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--cosmic-accent-cyan);
+  animation: gentle-pulse 3s ease-in-out infinite alternate;
+}
+
+.orion-belt::before {
+  top: 20px;
+  left: 30px;
+}
+
+.orion-belt::after {
+  top: 60px;
+  right: 40px;
+}
+
+/* 🎯 Cosmic Cards with Transparent Background */
+.cosmic-card {
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: var(--cosmic-border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--cosmic-shadow);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cosmic-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--subtle-glow);
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.cosmic-card:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: var(--cosmic-glow);
+  transform: translateY(-2px);
+}
+
+.cosmic-card:hover::before {
+  opacity: 1;
+}
+
+/* 🌟 Elegant Buttons */
+.cosmic-button {
+  background: var(--elegant-gradient);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: var(--cosmic-border-radius);
+  color: var(--cosmic-star-white);
+  font-family: var(--cosmic-font-primary);
+  font-weight: 600;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+.cosmic-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.cosmic-button:hover {
+  transform: scale(1.02);
+  box-shadow: var(--cosmic-glow);
+  border-color: var(--cosmic-primary);
+}
+
+.cosmic-button:hover::before {
+  left: 100%;
+}
+
+/* 🌌 Navigation Styling */
+.cosmic-nav {
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.cosmic-nav-item {
+  color: var(--cosmic-star-white);
+  font-family: var(--cosmic-font-primary);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cosmic-nav-item:hover {
+  color: var(--cosmic-primary);
+  text-shadow: 0 0 8px var(--cosmic-primary);
+}
+
+.cosmic-nav-item.active {
+  color: var(--cosmic-primary);
+  text-shadow: 0 0 12px var(--cosmic-primary);
+}
+
+.cosmic-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--subtle-glow);
+  border-radius: 1px;
+}
+
+/* 📊 Elegant Data Visualization */
+.cosmic-metric {
+  background: rgba(30, 60, 114, 0.15);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(100, 181, 246, 0.2);
+  border-radius: var(--cosmic-border-radius);
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cosmic-metric::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--subtle-glow);
+  animation: gentle-flow 4s linear infinite;
+}
+
+.cosmic-metric-value {
+  font-family: var(--cosmic-font-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: var(--subtle-glow);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.cosmic-metric-label {
+  font-family: var(--cosmic-font-secondary);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 🌟 Input Fields */
+.cosmic-input {
+  background: rgba(26, 26, 46, 0.7);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: var(--cosmic-border-radius);
+  color: var(--cosmic-star-white);
+  font-family: var(--cosmic-font-secondary);
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.cosmic-input:focus {
+  outline: none;
+  border-color: var(--cosmic-primary);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+  background: rgba(26, 26, 46, 0.9);
+}
+
+.cosmic-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 📱 Tables */
+.cosmic-table {
+  background: rgba(26, 26, 46, 0.7);
+  backdrop-filter: blur(15px);
+  border-radius: var(--cosmic-border-radius);
+  overflow: hidden;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.cosmic-table th {
+  background: rgba(30, 60, 114, 0.3);
+  color: var(--cosmic-primary);
+  font-family: var(--cosmic-font-primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.cosmic-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cosmic-table tr:hover {
+  background: rgba(0, 212, 255, 0.05);
+}
+
+/* 🌌 Refined Animations */
+@keyframes gentle-twinkle {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes subtle-drift {
+  0% { transform: translateX(-10px) translateY(-5px); }
+  100% { transform: translateX(10px) translateY(5px); }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes gentle-flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes elegant-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(0, 212, 255, 0.4); }
+}
+
+/* 🚀 Refined Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(26, 26, 46, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--subtle-glow);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--elegant-gradient);
+}
+
+/* 🌟 Loading Animations */
+.cosmic-loading {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 212, 255, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--cosmic-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 🌌 Responsive Design */
+@media (max-width: 768px) {
+  .cosmic-metric-value {
+    font-size: 2rem;
+  }
+  
+  .orion-belt {
+    display: none;
+  }
+}
+
+/* 🎨 Refined Theme Utilities */
+.text-cosmic-primary {
+  color: var(--cosmic-primary);
+  font-family: var(--cosmic-font-primary);
+}
+
+.text-cosmic-secondary {
+  color: var(--cosmic-star-white);
+  font-family: var(--cosmic-font-secondary);
+}
+
+.bg-cosmic-card {
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.gradient-cosmic {
+  background: var(--subtle-glow);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-cosmic {
+  box-shadow: var(--cosmic-shadow);
+}
+
+.glow-cosmic {
+  box-shadow: var(--cosmic-glow);
+  animation: elegant-glow 3s ease-in-out infinite;
+}
+
+/* Enhanced button and input styling */
+button, input, select, textarea {
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+/* Modern button styles */
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Enhanced transitions and animations */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glass morphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Card hover effects */
+.card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes iconBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Typography enhancements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Focus states */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .glass {
+    border-radius: 15px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Print styles */
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
+
+/* 🔥 ULTIMATE ANTI-BLUR NUMBER FIXES - HIGHEST PRIORITY - MUST BE LAST */
+.dashboard-number,
+.cosmic-metric-value,
+.crisp-number,
+.metric-value,
+[data-metric],
+.number-display,
+.stat-value,
+.count,
+.amount,
+.percentage,
+.metric,
+.dashboard-card .value,
+.dashboard-metric,
+.analytics-number,
+.kpi-value,
+.trend-value,
+.target-value,
+.progress-value,
+.prediction-value,
+span[class*="number"],
+div[class*="number"],
+p[class*="number"],
+span[class*="dashboard"],
+div[class*="dashboard"] span,
+div[class*="dashboard"] p,
+div[class*="cosmic"] span,
+div[class*="cosmic"] p {
+  /* FORCE SYSTEM FONTS - NO COSMIC FONTS */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+  
+  /* DISABLE ALL TRANSFORMS AND EFFECTS */
+  transform: none !important;
+  -webkit-transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+  
+  /* DISABLE ALL FILTERS */
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  
+  /* FORCE SOLID BACKGROUND */
+  background: transparent !important;
+  background-image: none !important;
+  background-clip: initial !important;
+  -webkit-background-clip: initial !important;
+  
+  /* DISABLE GRADIENT TEXT */
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+  
+  /* REMOVE ALL SHADOWS */
+  text-shadow: none !important;
+  box-shadow: none !important;
+  
+  /* FORCE CRISP RENDERING */
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+  font-smooth: never !important;
+  
+  /* DISABLE ANIMATIONS */
+  animation: none !important;
+  transition: none !important;
+  
+  /* FORCE PIXEL ALIGNMENT */
+  position: static !important;
+  will-change: auto !important;
+  contain: none !important;
+  isolation: auto !important;
+  
+  /* DISABLE PERSPECTIVE */
+  perspective: none !important;
+  -webkit-perspective: none !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  
+  /* FORCE INTEGER POSITIONING */
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  
+  /* DISABLE FONT FEATURES THAT CAUSE BLUR */
+  font-feature-settings: normal !important;
+  -webkit-font-feature-settings: normal !important;
+  font-variant-numeric: normal !important;
+  font-kerning: auto !important;
+  
+  /* FORCE STANDARD LINE HEIGHT */
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  
+  /* DISABLE SUBPIXEL RENDERING */
+  image-rendering: auto !important;
+  -webkit-image-rendering: auto !important;
+  
+  /* FORCE STANDARD DISPLAY */
+  display: inline !important;
+  vertical-align: baseline !important;
+  
+  /* DISABLE ZOOM EFFECTS */
+  zoom: 1 !important;
+  -webkit-zoom: 1 !important;
+}
+
+/* 🎯 SPECIFIC OVERRIDES FOR MAIN KPI VALUES */
+.cosmic-metric-value {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  background: transparent !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-clip: initial !important;
+  color: #ffffff !important;
+  font-size: 28px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+}
+
+/* 🔥 DISABLE ALL COSMIC EFFECTS ON NUMBER CONTAINERS */
+div:has(.dashboard-number),
+div:has(.cosmic-metric-value),
+div:has(.crisp-number) {
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  perspective: none !important;
+  will-change: auto !important;
+}

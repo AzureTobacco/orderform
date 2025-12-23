@@ -1,0 +1,2082 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  Home,
+  BarChart3,
+  Package,
+  ShoppingCart,
+  Factory,
+  Users,
+  UserCheck,
+  TrendingUp,
+  FileText,
+  Shield,
+  Leaf,
+  Globe,
+  Award,
+  Menu,
+  X,
+  Bell,
+  Search,
+  Settings,
+  LogOut,
+  Bot,
+  Calendar,
+  Thermometer,
+  Sun,
+  Moon,
+  Brain,
+  Zap,
+  Palette,
+  HelpCircle,
+  Command,
+} from 'lucide-react';
+import './index.css';
+
+// Import components
+import HomeComponent from './components/Home';
+import AdvancedDashboard from './components/AdvancedDashboard';
+import TobaccoProcessingPipeline from './components/TobaccoProcessingPipeline';
+import RegulatoryCompliance from './components/RegulatoryCompliance';
+import TobaccoAnalytics from './components/TobaccoAnalytics';
+import InventoryManagement from './components/InventoryManagement';
+import OrdersManagement from './components/OrdersManagement';
+import ProductionManagement from './components/ProductionManagement';
+import HRManagement from './components/HRManagement';
+import ClientManagement from './components/ClientManagement';
+import AdvancedAnalytics from './components/AdvancedAnalytics';
+import DocumentManagement from './components/DocumentManagement';
+import EnterpriseSecurityManagement from './components/EnterpriseSecurityManagement';
+import BusinessManagement from './components/BusinessManagement';
+import OperationsManagement from './components/OperationsManagement';
+import CRMManagement from './components/CRMManagement';
+import ReportingAnalytics from './components/ReportingAnalytics';
+import SupplyChainManagement from './components/SupplyChainManagement';
+import AssetManagement from './components/AssetManagement';
+import WorkflowAutomation from './components/WorkflowAutomation';
+import BusinessIntelligenceDashboard from './components/BusinessIntelligenceDashboard';
+import SystemConfiguration from './components/SystemConfiguration';
+import PackingListSystem from './components/PackingListSystem';
+import UserManagement from './components/UserManagement';
+
+
+// Global CSS for consistent theming
+const globalStyles = `
+  :root {
+    /* Primary Colors - Azure Theme */
+    --azure-primary: #0078d4;
+    --azure-secondary: #106ebe;
+    --azure-accent: #007acc;
+    --azure-light: #deecf9;
+    --azure-dark: #004578;
+    
+    /* Secondary Colors */
+    --success-primary: #107c10;
+    --success-secondary: #107c10;
+    --warning-primary: #ff8c00;
+    --warning-secondary: #d83b01;
+    --error-primary: #d13438;
+    --error-secondary: #a4262c;
+    --info-primary: #0078d4;
+    --info-secondary: #106ebe;
+    
+    /* Neutral Colors */
+    --gray-50: #fafafa;
+    --gray-100: #f5f5f5;
+    --gray-200: #e5e5e5;
+    --gray-300: #d4d4d4;
+    --gray-400: #a3a3a3;
+    --gray-500: #737373;
+    --gray-600: #525252;
+    --gray-700: #404040;
+    --gray-800: #262626;
+    --gray-900: #171717;
+    
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-overlay: rgba(0, 0, 0, 0.5);
+    
+    /* Text Colors */
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --text-inverse: #ffffff;
+    --text-muted: #6b7280;
+    
+    /* Border Colors */
+    --border-primary: #e2e8f0;
+    --border-secondary: #cbd5e1;
+    --border-accent: #0078d4;
+    
+    /* Input Colors */
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --input-focus: #0078d4;
+    --input-disabled: #f3f4f6;
+    
+    /* Status Colors */
+    --status-active: #10b981;
+    --status-inactive: #6b7280;
+    --status-pending: #f59e0b;
+    --status-error: #ef4444;
+    --status-warning: #f59e0b;
+    --status-info: #3b82f6;
+    
+    /* Shadow Colors */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-2xl: 16px;
+    --radius-full: 9999px;
+    
+    /* Typography */
+    --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    
+    /* Line Heights */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease-in-out;
+    --transition-normal: 250ms ease-in-out;
+    --transition-slow: 350ms ease-in-out;
+    
+    /* Z-Index */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --bg-card: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-tertiary: #94a3b8;
+      --border-primary: #334155;
+      --border-secondary: #475569;
+      --input-bg: #1e293b;
+      --input-border: #475569;
+    }
+  }
+
+  /* Global Reset and Base Styles */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Common Component Styles */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--azure-primary), var(--azure-secondary));
+    color: var(--text-inverse);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-accent);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success-primary), var(--success-secondary));
+    color: var(--text-inverse);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-warning {
+    background: linear-gradient(135deg, var(--warning-primary), var(--warning-secondary));
+    color: var(--text-inverse);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--error-primary), var(--error-secondary));
+    color: var(--text-inverse);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-lg);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-normal);
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+  }
+
+  .select-field {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-lg);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+  }
+
+  .select-field:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-success {
+    background: var(--status-active);
+    color: var(--text-inverse);
+  }
+
+  .badge-warning {
+    background: var(--status-warning);
+    color: var(--text-inverse);
+  }
+
+  .badge-error {
+    background: var(--status-error);
+    color: var(--text-inverse);
+  }
+
+  .badge-info {
+    background: var(--status-info);
+    color: var(--text-inverse);
+  }
+
+  .badge-neutral {
+    background: var(--gray-200);
+    color: var(--gray-700);
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal-backdrop);
+  }
+
+  .modal-content {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: var(--shadow-xl);
+  }
+
+  .grid-layout {
+    display: grid;
+    gap: var(--spacing-lg);
+  }
+
+  .grid-1 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-auto { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .flex-layout {
+    display: flex;
+    gap: var(--spacing-md);
+  }
+
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .text-center { text-align: center; }
+  .text-left { text-align: left; }
+  .text-right { text-align: right; }
+
+  .font-bold { font-weight: 700; }
+  .font-semibold { font-weight: 600; }
+  .font-medium { font-weight: 500; }
+  .font-normal { font-weight: 400; }
+
+  .text-xs { font-size: var(--font-size-xs); }
+  .text-sm { font-size: var(--font-size-sm); }
+  .text-base { font-size: var(--font-size-base); }
+  .text-lg { font-size: var(--font-size-lg); }
+  .text-xl { font-size: var(--font-size-xl); }
+  .text-2xl { font-size: var(--font-size-2xl); }
+  .text-3xl { font-size: var(--font-size-3xl); }
+  .text-4xl { font-size: var(--font-size-4xl); }
+
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-tertiary { color: var(--text-tertiary); }
+  .text-muted { color: var(--text-muted); }
+  .text-success { color: var(--status-active); }
+  .text-warning { color: var(--status-warning); }
+  .text-error { color: var(--status-error); }
+  .text-info { color: var(--status-info); }
+
+  .bg-primary { background-color: var(--bg-primary); }
+  .bg-secondary { background-color: var(--bg-secondary); }
+  .bg-tertiary { background-color: var(--bg-tertiary); }
+  .bg-card { background-color: var(--bg-card); }
+
+  .border { border: 1px solid var(--border-primary); }
+  .border-t { border-top: 1px solid var(--border-primary); }
+  .border-b { border-bottom: 1px solid var(--border-primary); }
+  .border-l { border-left: 1px solid var(--border-primary); }
+  .border-r { border-right: 1px solid var(--border-primary); }
+
+  .rounded-sm { border-radius: var(--radius-sm); }
+  .rounded-md { border-radius: var(--radius-md); }
+  .rounded-lg { border-radius: var(--radius-lg); }
+  .rounded-xl { border-radius: var(--radius-xl); }
+  .rounded-2xl { border-radius: var(--radius-2xl); }
+  .rounded-full { border-radius: var(--radius-full); }
+
+  .shadow-sm { box-shadow: var(--shadow-sm); }
+  .shadow-md { box-shadow: var(--shadow-md); }
+  .shadow-lg { box-shadow: var(--shadow-lg); }
+  .shadow-xl { box-shadow: var(--shadow-xl); }
+
+  .p-xs { padding: var(--spacing-xs); }
+  .p-sm { padding: var(--spacing-sm); }
+  .p-md { padding: var(--spacing-md); }
+  .p-lg { padding: var(--spacing-lg); }
+  .p-xl { padding: var(--spacing-xl); }
+  .p-2xl { padding: var(--spacing-2xl); }
+
+  .m-xs { margin: var(--spacing-xs); }
+  .m-sm { margin: var(--spacing-sm); }
+  .m-md { margin: var(--spacing-md); }
+  .m-lg { margin: var(--spacing-lg); }
+  .m-xl { margin: var(--spacing-xl); }
+  .m-2xl { margin: var(--spacing-2xl); }
+
+  .mb-xs { margin-bottom: var(--spacing-xs); }
+  .mb-sm { margin-bottom: var(--spacing-sm); }
+  .mb-md { margin-bottom: var(--spacing-md); }
+  .mb-lg { margin-bottom: var(--spacing-lg); }
+  .mb-xl { margin-bottom: var(--spacing-xl); }
+  .mb-2xl { margin-bottom: var(--spacing-2xl); }
+
+  .mt-xs { margin-top: var(--spacing-xs); }
+  .mt-sm { margin-top: var(--spacing-sm); }
+  .mt-md { margin-top: var(--spacing-md); }
+  .mt-lg { margin-top: var(--spacing-lg); }
+  .mt-xl { margin-top: var(--spacing-xl); }
+  .mt-2xl { margin-top: var(--spacing-2xl); }
+
+  .ml-xs { margin-left: var(--spacing-xs); }
+  .ml-sm { margin-left: var(--spacing-sm); }
+  .ml-md { margin-left: var(--spacing-md); }
+  .ml-lg { margin-left: var(--spacing-lg); }
+  .ml-xl { margin-left: var(--spacing-xl); }
+  .ml-2xl { margin-left: var(--spacing-2xl); }
+
+  .mr-xs { margin-right: var(--spacing-xs); }
+  .mr-sm { margin-right: var(--spacing-sm); }
+  .mr-md { margin-right: var(--spacing-md); }
+  .mr-lg { margin-right: var(--spacing-lg); }
+  .mr-xl { margin-right: var(--spacing-xl); }
+  .mr-2xl { margin-right: var(--spacing-2xl); }
+
+  /* Loading and Animation */
+  .loading-spinner {
+    border: 2px solid var(--border-primary);
+    border-top: 2px solid var(--azure-primary);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-in {
+    animation: slideIn 0.3s ease-in-out;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 640px) {
+    .container {
+      padding: var(--spacing-md);
+    }
+    
+    .card {
+      padding: var(--spacing-md);
+    }
+    
+    .modal-content {
+      padding: var(--spacing-lg);
+      margin: var(--spacing-md);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid-auto {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .grid-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+`
+
+// Inject global styles
+const styleSheet = document.createElement('style')
+styleSheet.textContent = globalStyles
+document.head.appendChild(styleSheet)
+
+function App() {
+  const [activeModule, setActiveModule] = useState('home');
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [temperature, setTemperature] = useState(24);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [autoMinimizeTimer, setAutoMinimizeTimer] =
+    useState<NodeJS.Timeout | null>(null);
+  const [isHoveringLeftEdge, setIsHoveringLeftEdge] = useState(false);
+  const [isInteractingWithSidebar, setIsInteractingWithSidebar] =
+    useState(false);
+
+  // Mobile touch/swipe state
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchStartY, setTouchStartY] = useState(0);
+
+  // New state variables for button functionality
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  interface Notification {
+    id: number;
+    title: string;
+    message: string;
+    time: string;
+    unread: boolean;
+  }
+
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: 1,
+      title: 'New Order Received',
+      message: 'Order #1234 from Premium Tobacco Co.',
+      time: '5 min ago',
+      unread: true,
+    },
+    {
+      id: 2,
+      title: 'Inventory Alert',
+      message: 'Low stock: Virginia Blend Tobacco',
+      time: '15 min ago',
+      unread: true,
+    },
+    {
+      id: 3,
+      title: 'Production Complete',
+      message: 'Batch #567 ready for quality check',
+      time: '1 hour ago',
+      unread: false,
+    },
+  ]);
+
+  const [aiMessages, setAiMessages] = useState<
+    Array<{ role: 'user' | 'assistant'; content: string }>
+  >([
+    {
+      role: 'assistant',
+      content:
+        "🎉 **Azure Tobacco Industrial FZCO ERP System - FULLY OPERATIONAL!** 🎉\n\nYour tobacco manufacturing ERP system is now complete with:\n\n✅ **Tobacco Processing Pipeline** - Complete manufacturing workflow\n✅ **Quality Control System** - Multi-market compliance (UAE/GCC/EU/US)\n✅ **Raw Materials Management** - Tobacco-specific inventory tracking\n✅ **Compliance Management** - Automated regulatory compliance\n✅ **User Training System** - Role-based training modules\n✅ **Workflow Automation** - AI-powered process optimization\n✅ **Export Operations** - Jebel Ali Free Zone integration\n\n**Quick Access:**\n• 🏭 Production: Tobacco Processing Pipeline\n• 🔬 Quality: Quality Control & Testing\n• 📦 Inventory: Raw Materials Management\n• 🛡️ Compliance: Regulatory Management\n• 👥 Users: Training & Role Management\n• ⚡ Automation: Workflow Management\n\nHow can I help you optimize your tobacco manufacturing operations today?",
+    },
+  ]);
+  const [aiInput, setAiInput] = useState('');
+  const [isAiTyping, setIsAiTyping] = useState(false);
+
+  // AI Assistant functionality
+  const handleAiMessage = async (message: string) => {
+    if (!message.trim()) {
+      return;
+    }
+
+    // Add user message
+    const newMessages = [
+      ...aiMessages,
+      { role: 'user' as const, content: message },
+    ];
+    setAiMessages(newMessages);
+    setAiInput('');
+    setIsAiTyping(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const responses = [
+        'I can help you analyze your tobacco inventory levels and suggest optimal reorder points based on seasonal demand patterns.',
+        'For regulatory compliance, I recommend checking your tax stamp inventory and ensuring all import documentation is up to date.',
+        'Based on current production data, I suggest optimizing your curing process temperature to improve leaf quality by 15%.',
+        'Your sales analytics show a 23% increase in premium blend demand. Consider increasing production of high-margin products.',
+        'I notice some inventory discrepancies in warehouse section B. Would you like me to generate a detailed audit report?',
+        'Current market trends suggest expanding your flavored tobacco line. I can provide a comprehensive market analysis.',
+        'Your production efficiency has improved by 12% this quarter. The new quality control measures are showing positive results.',
+        "I recommend reviewing your supplier contracts. I've identified potential cost savings of 8% on raw materials.",
+      ];
+
+      const randomResponse =
+        responses[Math.floor(Math.random() * responses.length)];
+      setAiMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: randomResponse },
+      ]);
+      setIsAiTyping(false);
+    }, 1500);
+  };
+
+  // Auto-minimize functionality with improved sensitivity
+  const resetAutoMinimizeTimer = () => {
+    if (autoMinimizeTimer) {
+      clearTimeout(autoMinimizeTimer);
+    }
+
+    // Only start auto-minimize on desktop when user is not actively interacting with sidebar
+    if (window.innerWidth > 1024 && !isInteractingWithSidebar) {
+      const timer = setTimeout(() => {
+        if (!isHoveringLeftEdge && !isInteractingWithSidebar) {
+          setSidebarOpen(false);
+        }
+      }, 3000); // 3 seconds delay for complete collapse
+
+      setAutoMinimizeTimer(timer);
+    }
+  };
+
+  // Handle mouse movement for left edge detection
+  const handleMouseMove = (e: MouseEvent) => {
+    // Only on desktop (wider than tablet breakpoint)
+    if (window.innerWidth > 1024) {
+      const leftEdgeThreshold = 20; // pixels from left edge - same as CSS touch zone
+      const isNearLeftEdge = e.clientX <= leftEdgeThreshold;
+
+      if (isNearLeftEdge && !sidebarOpen) {
+        setSidebarOpen(true);
+        setIsHoveringLeftEdge(true);
+        setIsInteractingWithSidebar(false);
+        if (autoMinimizeTimer) {
+          clearTimeout(autoMinimizeTimer);
+          setAutoMinimizeTimer(null);
+        }
+      } else if (!isNearLeftEdge && isHoveringLeftEdge) {
+        setIsHoveringLeftEdge(false);
+        // Don't immediately start timer, wait for sidebar interaction to end
+        if (!isInteractingWithSidebar) {
+          resetAutoMinimizeTimer();
+        }
+      }
+    }
+  };
+
+  // Handle sidebar interaction
+  const handleSidebarInteraction = () => {
+    if (!sidebarOpen) {
+      setSidebarOpen(true);
+    }
+    setIsInteractingWithSidebar(true);
+    if (autoMinimizeTimer) {
+      clearTimeout(autoMinimizeTimer);
+      setAutoMinimizeTimer(null);
+    }
+  };
+
+  // Handle when user stops interacting with sidebar
+  const handleSidebarLeave = () => {
+    setIsInteractingWithSidebar(false);
+    // Start auto-minimize timer after a short delay to allow for quick re-entry
+    setTimeout(() => {
+      if (!isInteractingWithSidebar && !isHoveringLeftEdge) {
+        resetAutoMinimizeTimer();
+      }
+    }, 1000); // 1 second grace period
+  };
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Simulate temperature updates
+    const tempTimer = setInterval(() => {
+      setTemperature(prev => prev + (Math.random() - 0.5) * 0.5);
+    }, 30000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(tempTimer);
+    };
+  }, []);
+
+  // Auto-minimize setup
+  useEffect(() => {
+    // Add mouse move listener for left edge detection
+    document.addEventListener('mousemove', handleMouseMove);
+
+    // Only start auto-minimize timer if sidebar is open and user is not interacting
+    if (sidebarOpen && !isInteractingWithSidebar && !isHoveringLeftEdge) {
+      resetAutoMinimizeTimer();
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (autoMinimizeTimer) {
+        clearTimeout(autoMinimizeTimer);
+      }
+    };
+  }, [
+    sidebarOpen,
+    isHoveringLeftEdge,
+    isInteractingWithSidebar,
+    handleMouseMove,
+    resetAutoMinimizeTimer,
+    autoMinimizeTimer,
+  ]);
+
+  // Reset timer when sidebar state changes
+  useEffect(() => {
+    if (sidebarOpen && !isInteractingWithSidebar) {
+      // Small delay to allow for immediate interactions
+      setTimeout(() => {
+        if (!isInteractingWithSidebar && !isHoveringLeftEdge) {
+          resetAutoMinimizeTimer();
+        }
+      }, 500);
+    }
+  }, [
+    sidebarOpen,
+    isInteractingWithSidebar,
+    isHoveringLeftEdge,
+    resetAutoMinimizeTimer,
+  ]);
+
+  // Enhanced click outside handling with mobile backdrop support
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Close notifications dropdown
+      if (!target.closest('.cosmic-notifications-dropdown') && !target.closest('.cosmic-header-btn')) {
+        setShowNotifications(false);
+      }
+      
+      // Close settings dropdown
+      if (!target.closest('.cosmic-settings-dropdown') && !target.closest('.cosmic-header-btn')) {
+        setShowSettings(false);
+      }
+      
+      // Close user menu dropdown
+      if (!target.closest('.cosmic-user-menu-dropdown') && !target.closest('.cosmic-user-menu')) {
+        setShowUserMenu(false);
+      }
+
+      // Close search results
+      if (!target.closest('.cosmic-search-bar')) {
+        setShowSearchResults(false);
+      }
+
+      // Mobile/Tablet: Close sidebar when clicking on backdrop (outside sidebar area)
+      if (sidebarOpen && window.innerWidth <= 1024) {
+        const isClickOnSidebar = target.closest('.cosmic-sidebar');
+        const isClickOnToggleButton = target.closest('.cosmic-sidebar-toggle');
+
+        if (!isClickOnSidebar && !isClickOnToggleButton) {
+          setSidebarOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showNotifications, showSettings, showUserMenu, sidebarOpen]);
+
+  // Mobile touch/swipe handlers for sidebar
+  const handleTouchStart = (e: TouchEvent) => {
+    if (window.innerWidth <= 1024) {
+      const touchX = e.touches[0].clientX;
+      setTouchStartX(touchX);
+      setTouchStartY(e.touches[0].clientY);
+
+      // Open sidebar if touching left edge and sidebar is closed
+      if (!sidebarOpen && touchX <= 20) {
+        setSidebarOpen(true);
+        setIsInteractingWithSidebar(true);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (window.innerWidth <= 1024) {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      // Only handle swipe if sidebar is open
+      if (sidebarOpen) {
+        // Check if it's a horizontal swipe (more horizontal than vertical)
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+          // Swipe left to close sidebar
+          if (deltaX < -50) {
+            setSidebarOpen(false);
+          }
+        }
+      }
+    }
+  };
+
+  // Add touch event listeners for mobile swipe and left edge detection
+  useEffect(() => {
+    if (window.innerWidth <= 1024) {
+      document.addEventListener('touchstart', handleTouchStart, {
+        passive: true,
+      });
+      document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+      return () => {
+        document.removeEventListener('touchstart', handleTouchStart);
+        document.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+    return undefined;
+  }, [touchStartX, touchStartY, sidebarOpen, handleTouchStart, handleTouchEnd]);
+
+  // Handle window resize for responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      // Close sidebar on mobile/tablet when resizing to smaller screen
+      if (window.innerWidth <= 1024 && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+      // Open sidebar on desktop when resizing to larger screen (complete collapse to push behavior)
+      else if (window.innerWidth > 1024 && !sidebarOpen) {
+        setSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [sidebarOpen]);
+
+  // Add keyboard shortcut listeners
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+      }
+
+      // Escape key to close modals and dropdowns
+      if (event.key === 'Escape') {
+        setShowAIAssistant(false);
+        setShowNotifications(false);
+        setShowSettings(false);
+        setShowUserMenu(false);
+        setShowSearchResults(false);
+        setSearchQuery('');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+
+  const navigationItems = [
+    // Core System
+    {
+      id: 'home',
+      label: 'Home Screen',
+      icon: Home,
+      component: HomeComponent,
+      category: 'Core',
+    },
+    {
+      id: 'dashboard',
+      label: 'Advanced Dashboard',
+      icon: BarChart3,
+      component: AdvancedDashboard,
+      category: 'Core',
+    },
+
+    // Tobacco Operations
+    {
+      id: 'tobacco_processing',
+      label: 'Tobacco Processing',
+      icon: Leaf,
+      component: TobaccoProcessingPipeline,
+      category: 'Tobacco Operations',
+    },
+    {
+      id: 'regulatory',
+      label: 'Regulatory Compliance',
+      icon: Shield,
+      component: RegulatoryCompliance,
+      category: 'Tobacco Operations',
+    },
+    {
+      id: 'tobacco-analytics',
+      label: 'Tobacco Analytics',
+      icon: TrendingUp,
+      component: TobaccoAnalytics,
+      category: 'Business Management',
+    },
+
+    // Business Management
+    {
+      id: 'inventory',
+      label: 'Inventory Management',
+      icon: Package,
+      component: InventoryManagement,
+      category: 'Business Management',
+    },
+    {
+      id: 'orders',
+      label: 'Orders Management',
+      icon: ShoppingCart,
+      component: OrdersManagement,
+      category: 'Business Management',
+    },
+    {
+      id: 'production',
+      label: 'Production Management',
+      icon: Factory,
+      component: ProductionManagement,
+      category: 'Business Management',
+    },
+    {
+      id: 'supply_chain',
+      label: 'Supply Chain Management',
+      icon: Package,
+      component: SupplyChainManagement,
+      category: 'Business Management',
+    },
+    {
+      id: 'assets',
+      label: 'Asset Management',
+      icon: Settings,
+      component: AssetManagement,
+      category: 'Business Management',
+    },
+
+    // Customer Relations
+    {
+      id: 'clients',
+      label: 'Client Management',
+      icon: UserCheck,
+      component: ClientManagement,
+      category: 'Customer Relations',
+    },
+    {
+      id: 'crm',
+      label: 'CRM Management',
+      icon: Users,
+      component: CRMManagement,
+      category: 'Customer Relations',
+    },
+
+    // Analytics & Reporting
+    {
+      id: 'analytics',
+      label: 'Advanced Analytics',
+      icon: Award,
+      component: AdvancedAnalytics,
+      category: 'Analytics & Reporting',
+    },
+    {
+      id: 'reporting',
+      label: 'Reporting Analytics',
+      icon: FileText,
+      component: ReportingAnalytics,
+      category: 'Analytics & Reporting',
+    },
+    {
+      id: 'business_intelligence',
+      label: 'Business Intelligence',
+      icon: Brain,
+      component: BusinessIntelligenceDashboard,
+      category: 'Analytics & Reporting',
+    },
+
+    // Administration
+    {
+      id: 'hr',
+      label: 'HR Management',
+      icon: Users,
+      component: HRManagement,
+      category: 'Administration',
+    },
+    {
+      id: 'documents',
+      label: 'Document Management',
+      icon: FileText,
+      component: DocumentManagement,
+      category: 'Administration',
+    },
+    {
+      id: 'security',
+      label: 'Enterprise Security',
+      icon: Shield,
+      component: EnterpriseSecurityManagement,
+      category: 'Administration',
+    },
+    {
+      id: 'business',
+      label: 'Business Management',
+      icon: Globe,
+      component: BusinessManagement,
+      category: 'Administration',
+    },
+    {
+      id: 'operations',
+      label: 'Operations Management',
+      icon: Settings,
+      component: OperationsManagement,
+      category: 'Administration',
+    },
+    {
+      id: 'workflow',
+      label: 'Workflow Automation',
+      icon: Zap,
+      component: WorkflowAutomation,
+      category: 'Administration',
+    },
+    {
+      id: 'system_config',
+      label: 'System Configuration',
+      icon: Settings,
+      component: SystemConfiguration,
+      category: 'Administration',
+    },
+    {
+      id: 'packing_list',
+      label: 'Packing List System',
+      icon: Package,
+      component: PackingListSystem,
+      category: 'Business Management',
+    },
+    {
+      id: 'user_management',
+      label: 'User Management',
+      icon: Users,
+      component: UserManagement,
+      category: 'Administration',
+    },
+
+  ];
+
+  // Group navigation items by category
+  const groupedNavigation = navigationItems.reduce(
+    (groups, item) => {
+      const category = item.category;
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(item);
+      return groups;
+    },
+    {} as Record<string, typeof navigationItems>
+  );
+
+  const formatTime = (date: Date): string => {
+    return date.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatDate = (date: Date): string => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getTimeIcon = () => {
+    const hour = currentTime.getHours();
+    if (hour >= 6 && hour < 18) {
+      return <Sun size={16} className="text-yellow-400" />;
+    } else {
+      return <Moon size={16} className="text-blue-300" />;
+    }
+  };
+
+  // New button handler functions
+  const handleNotificationsClick = () => {
+    setShowNotifications(!showNotifications);
+    setShowSettings(false);
+    setShowUserMenu(false);
+  };
+
+  const handleSettingsClick = () => {
+    setShowSettings(!showSettings);
+    setShowNotifications(false);
+    setShowUserMenu(false);
+  };
+
+  const handleUserMenuClick = () => {
+    setShowUserMenu(!showUserMenu);
+    setShowNotifications(false);
+    setShowSettings(false);
+  };
+
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      // Clear any stored authentication data
+      localStorage.removeItem('authToken');
+      sessionStorage.clear();
+
+      // Redirect to login page or show login modal
+      alert('You have been logged out successfully!');
+
+      // In a real app, you would redirect to login page:
+      // window.location.href = '/login'
+      // or use router navigation
+    }
+  };
+
+  const markNotificationAsRead = (notificationId: number) => {
+    setNotifications(prev =>
+      prev.map(notification =>
+        notification.id === notificationId
+          ? { ...notification, unread: false }
+          : notification
+      )
+    );
+  };
+
+  // Enhanced dropdown handlers with navigation and functionality
+  const handleViewAllNotifications = () => {
+    setShowNotifications(false);
+    setActiveModule('dashboard'); // Navigate to dashboard where notifications might be shown
+  };
+
+  const handleSettingsNavigation = (setting: string) => {
+    setShowSettings(false);
+    switch (setting) {
+      case 'account':
+        setActiveModule('system_config'); // System Configuration for account settings
+        break;
+      case 'notifications':
+        setActiveModule('system_config'); // System Configuration for notification preferences
+        break;
+      case 'security':
+        setActiveModule('security'); // Enterprise Security module
+        break;
+      case 'system':
+        setActiveModule('system_config'); // System Configuration for system settings
+        break;
+      case 'theme':
+        setActiveModule('system_config'); // System Configuration for theme preferences
+        break;
+      default:
+        // Settings navigation not handled
+        break;
+    }
+  };
+
+  const handleUserMenuNavigation = (action: string) => {
+    setShowUserMenu(false);
+    switch (action) {
+      case 'profile':
+        setActiveModule('hr'); // HR Management for user profile
+        break;
+      case 'settings':
+        setActiveModule('system_config'); // System Configuration for account settings
+        break;
+      case 'preferences':
+        setActiveModule('system_config'); // System Configuration for preferences
+        break;
+      case 'help':
+        // Open help documentation or support
+        window.open(
+          'mailto:support@azuretobacco.com?subject=ERP Support Request',
+          '_blank'
+        );
+        break;
+      default:
+        // User menu navigation not handled
+        break;
+    }
+  };
+
+  // Search functionality
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      setShowSearchResults(true);
+    } else {
+      setShowSearchResults(false);
+    }
+  };
+
+  const handleSearchResultClick = (moduleId: string) => {
+    setActiveModule(moduleId);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
+
+  const filteredSearchResults = searchQuery.trim() 
+    ? navigationItems.filter(item => 
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
+
+  return (
+    <div className="cosmic-app">
+      {/* Enhanced Cosmic Background */}
+      <div className="cosmic-background">
+        <div className="cosmic-stars"></div>
+        <div className="cosmic-nebula"></div>
+        <div className="orion-belt"></div>
+        <div className="cosmic-aurora"></div>
+      </div>
+
+      {/* Enhanced Top Navigation Bar */}
+      <header className="cosmic-header">
+        <div className="cosmic-header-left">
+          <button
+            className="cosmic-sidebar-toggle"
+            onClick={() => {
+              setSidebarOpen(!sidebarOpen);
+              handleSidebarInteraction();
+            }}
+          >
+            <Menu size={20} />
+          </button>
+          <div className="cosmic-company-header">
+            <div className="cosmic-company-text">
+              <h1>Azure Tobacco Industrial FZCO</h1>
+              <p>Premium Hookah Tobacco • Enterprise Resource Planning</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="cosmic-header-center">
+          <div className="cosmic-search-bar" style={{ position: 'relative' }}>
+            <Search size={18} />
+            <input
+              type="text"
+              placeholder="Search modules, data, reports..."
+              className="cosmic-search-input"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
+            />
+            {showSearchResults && searchQuery.trim() && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                background: '#1e293b',
+                border: '1px solid #06b6d4',
+                borderRadius: '8px',
+                marginTop: '4px',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                zIndex: 9999,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                animation: 'dropdown-fade-in 0.2s ease-out'
+              }}>
+                {filteredSearchResults.length > 0 ? (
+                  filteredSearchResults.map(item => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleSearchResultClick(item.id)}
+                      style={{
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #334155',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        color: '#fff'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#334155'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <item.icon size={16} />
+                      <div>
+                        <div style={{ fontWeight: 500 }}>{item.label}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{item.category}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{
+                    padding: '16px',
+                    textAlign: 'center',
+                    color: '#94a3b8',
+                    fontSize: '0.9rem'
+                  }}>
+                    No modules found for "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <motion.button
+            className="cosmic-header-btn"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{ marginLeft: '0.5rem' }}
+          >
+            <Command size={18} />
+          </motion.button>
+        </div>
+
+        <div className="cosmic-header-right">
+          {/* Time and Date Widget */}
+          <div className="cosmic-time-widget">
+            <div className="cosmic-time-display">
+              <div className="cosmic-time">
+                {getTimeIcon()}
+                <span className="time-text">{formatTime(currentTime)}</span>
+              </div>
+              <div className="cosmic-date">
+                <Calendar size={14} />
+                <span className="date-text">{formatDate(currentTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Temperature Widget */}
+          <div className="cosmic-temperature-widget">
+            <Thermometer size={16} />
+            <span className="temperature-value">
+              {temperature.toFixed(1)}°C
+            </span>
+            <span className="temperature-label">Dubai</span>
+          </div>
+
+          {/* AI Assistant Button */}
+          <button
+            className="cosmic-ai-assistant-btn"
+            onClick={() => setShowAIAssistant(true)}
+            title="AI Assistant"
+          >
+            <Bot size={18} />
+            <span className="ai-pulse"></span>
+          </button>
+
+          {/* Notifications Button */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="cosmic-header-btn"
+              onClick={handleNotificationsClick}
+              title="Notifications"
+            >
+              <Bell size={18} />
+              <span className="cosmic-notification-badge">
+                {notifications.filter(n => n.unread).length}
+              </span>
+            </button>
+          </div>
+
+          {/* Settings Button */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="cosmic-header-btn"
+              onClick={handleSettingsClick}
+              title="Settings"
+            >
+              <Settings size={18} />
+            </button>
+          </div>
+
+          {/* User Menu Button - Fixed Structure */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="cosmic-user-menu"
+              onClick={handleUserMenuClick}
+              title="User Menu"
+            >
+              <div className="cosmic-user-avatar-header">
+                <Users size={16} />
+              </div>
+              <div className="cosmic-user-info-header">
+                <span className="cosmic-user-name-header">Admin User</span>
+                <span className="cosmic-user-role-header">
+                  System Administrator
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Enhanced Navigation Sidebar with Auto-Minimize */}
+      <div
+        className={`cosmic-sidebar ${sidebarOpen ? 'open' : 'closed'} ${isHoveringLeftEdge ? 'hover-active' : ''}`}
+        onMouseEnter={handleSidebarInteraction}
+        onMouseLeave={handleSidebarLeave}
+        onClick={handleSidebarInteraction}
+      >
+        <div className="cosmic-sidebar-header">
+          <div className="cosmic-company-sidebar">
+            {sidebarOpen && (
+              <div className="cosmic-company-text-sidebar">
+                <h2>Azure Tobacco</h2>
+                <p>Industrial FZCO</p>
+                <div className="cosmic-company-subtitle">
+                  <span>Premium ERP Solutions</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <nav className="cosmic-nav">
+          {Object.entries(groupedNavigation).map(([category, items]) => (
+            <div key={category} className="cosmic-nav-category">
+              {sidebarOpen && (
+                <div className="cosmic-nav-category-header">
+                  <span className="cosmic-nav-category-title">{category}</span>
+                  <div className="cosmic-nav-category-divider"></div>
+                </div>
+              )}
+              <div className="cosmic-nav-category-items">
+                {items.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveModule(item.id);
+                      handleSidebarInteraction();
+                      // Auto-close sidebar on mobile/tablet after navigation
+                      if (window.innerWidth <= 1024) {
+                        setTimeout(() => setSidebarOpen(false), 150);
+                      }
+                    }}
+                    className={`cosmic-nav-item ${activeModule === item.id ? 'active' : ''}`}
+                    title={!sidebarOpen ? item.label : ''}
+                  >
+                    <item.icon size={20} />
+                    {sidebarOpen && <span>{item.label}</span>}
+                    {activeModule === item.id && (
+                      <div className="cosmic-nav-indicator" />
+                    )}
+                    <div className="cosmic-nav-glow"></div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        {sidebarOpen && (
+          <div className="cosmic-sidebar-footer">
+            <div className="cosmic-system-status">
+              <div className="status-indicator online"></div>
+              <span>System Online</span>
+            </div>
+            <div className="cosmic-user-info">
+              <div className="cosmic-user-avatar">
+                <Users size={20} />
+              </div>
+              <div className="cosmic-user-details">
+                <p className="cosmic-user-name">Admin User</p>
+                <p className="cosmic-user-role">System Administrator</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content Area */}
+      <div className={`cosmic-main ${sidebarOpen ? '' : 'sidebar-closed'}`}>
+        <div className="cosmic-content">
+          {(() => {
+            if (activeModule === 'home') {
+              return <HomeComponent onModuleChange={setActiveModule} />;
+            }
+
+            const foundNavItem = navigationItems.find(
+              item => item.id === activeModule
+            );
+            if (foundNavItem && foundNavItem.component) {
+              const ActiveComponent = foundNavItem.component;
+              return <ActiveComponent />;
+            }
+
+            // Fallback to placeholder
+            return (
+              <div className="cosmic-placeholder">
+                <div
+                  className="cosmic-card"
+                  style={{
+                    padding: '48px',
+                    textAlign: 'center',
+                    maxWidth: '600px',
+                    margin: '0 auto',
+                  }}
+                >
+                  <div
+                    style={{
+                      background:
+                        'linear-gradient(135deg, var(--cosmic-accent-cyan), var(--cosmic-accent-purple))',
+                      padding: '20px',
+                      borderRadius: '50%',
+                      width: '80px',
+                      height: '80px',
+                      margin: '0 auto 24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Leaf size={40} color="white" />
+                  </div>
+                  <h2
+                    style={{
+                      fontFamily: 'var(--cosmic-font-primary)',
+                      marginBottom: '16px',
+                      color: 'var(--cosmic-star-white)',
+                    }}
+                  >
+                    Welcome to Azure Tobacco Industrial FZCO
+                  </h2>
+                  <p
+                    style={{
+                      color: 'var(--text-secondary)',
+                      marginBottom: '24px',
+                    }}
+                  >
+                    Select a module from the navigation to get started with your
+                    ERP system.
+                  </p>
+                  <button
+                    onClick={() => setActiveModule('home')}
+                    className="cosmic-button"
+                  >
+                    Go to Home Dashboard
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+
+      {/* Enhanced AI Assistant Modal */}
+      {showAIAssistant && (
+        <div
+          className="cosmic-modal-overlay"
+          onClick={() => setShowAIAssistant(false)}
+        >
+          <div
+            className="cosmic-modal-content"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '90%',
+              maxWidth: '800px',
+              height: '80vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div
+              className="cosmic-card"
+              style={{
+                padding: '0',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* AI Assistant Header */}
+              <div
+                style={{
+                  padding: '20px',
+                  borderBottom: '1px solid rgba(0, 212, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
+                >
+                  <div
+                    style={{
+                      background:
+                        'linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary))',
+                      padding: '8px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Bot size={24} color="white" />
+                  </div>
+                  <div>
+                    <h3
+                      style={{
+                        color: 'var(--cosmic-star-white)',
+                        margin: '0',
+                        fontSize: '1.2rem',
+                      }}
+                    >
+                      Azure AI Assistant
+                    </h3>
+                    <p
+                      style={{
+                        color: 'var(--text-secondary)',
+                        margin: '0',
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      Intelligent ERP Support • Online
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAIAssistant(false)}
+                  style={{
+                    background: 'none',
+                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                    borderRadius: '6px',
+                    padding: '8px',
+                    color: 'var(--cosmic-star-white)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Chat Messages */}
+              <div
+                style={{
+                  flex: 1,
+                  padding: '20px',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                {aiMessages.map((message, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: 'flex',
+                      justifyContent:
+                        message.role === 'user' ? 'flex-end' : 'flex-start',
+                    }}
+                  >
+                    <div
+                      style={{
+                        maxWidth: '70%',
+                        padding: '12px 16px',
+                        borderRadius: '16px',
+                        background:
+                          message.role === 'user'
+                            ? 'linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary))'
+                            : 'rgba(22, 33, 62, 0.8)',
+                        border:
+                          message.role === 'user'
+                            ? 'none'
+                            : '1px solid rgba(0, 212, 255, 0.2)',
+                        color: 'var(--cosmic-star-white)',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.5',
+                      }}
+                    >
+                      {message.content}
+                    </div>
+                  </div>
+                ))}
+
+                {isAiTyping && (
+                  <div
+                    style={{ display: 'flex', justifyContent: 'flex-start' }}
+                  >
+                    <div
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: '16px',
+                        background: 'rgba(22, 33, 62, 0.8)',
+                        border: '1px solid rgba(0, 212, 255, 0.2)',
+                        color: 'var(--cosmic-star-white)',
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '4px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <div
+                          className="ai-typing-dot"
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            background: 'var(--cosmic-accent-cyan)',
+                            borderRadius: '50%',
+                            animation: 'gentle-pulse 1s ease-in-out infinite',
+                          }}
+                        ></div>
+                        <div
+                          className="ai-typing-dot"
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            background: 'var(--cosmic-accent-cyan)',
+                            borderRadius: '50%',
+                            animation:
+                              'gentle-pulse 1s ease-in-out infinite 0.2s',
+                          }}
+                        ></div>
+                        <div
+                          className="ai-typing-dot"
+                          style={{
+                            width: '6px',
+                            height: '6px',
+                            background: 'var(--cosmic-accent-cyan)',
+                            borderRadius: '50%',
+                            animation:
+                              'gentle-pulse 1s ease-in-out infinite 0.4s',
+                          }}
+                        ></div>
+                        <span style={{ marginLeft: '8px', opacity: 0.7 }}>
+                          AI is thinking...
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input Area */}
+              <div
+                style={{
+                  padding: '20px',
+                  borderTop: '1px solid rgba(0, 212, 255, 0.2)',
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'flex-end',
+                }}
+              >
+                <input
+                  type="text"
+                  value={aiInput}
+                  onChange={e => setAiInput(e.target.value)}
+                  onKeyPress={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleAiMessage(aiInput);
+                    }
+                  }}
+                  placeholder="Ask about inventory, production, compliance, analytics..."
+                  style={{
+                    flex: 1,
+                    background: 'rgba(22, 33, 62, 0.6)',
+                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    color: 'var(--cosmic-star-white)',
+                    fontSize: '0.95rem',
+                    outline: 'none',
+                    resize: 'none',
+                  }}
+                  disabled={isAiTyping}
+                />
+                <button
+                  onClick={() => handleAiMessage(aiInput)}
+                  disabled={isAiTyping || !aiInput.trim()}
+                  style={{
+                    background:
+                      aiInput.trim() && !isAiTyping
+                        ? 'linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary))'
+                        : 'rgba(22, 33, 62, 0.6)',
+                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    color: 'var(--cosmic-star-white)',
+                    cursor:
+                      aiInput.trim() && !isAiTyping ? 'pointer' : 'not-allowed',
+                    opacity: aiInput.trim() && !isAiTyping ? 1 : 0.5,
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ROOT LEVEL DROPDOWNS - PORTAL STYLE RENDERING */}
+      {/* Notifications Dropdown */}
+      {showNotifications && (
+        <div className="cosmic-dropdown notifications-dropdown">
+          <div className="dropdown-header">
+            <h4>Notifications</h4>
+            <span className="notification-count">
+              {notifications.filter(n => n.unread).length} unread
+            </span>
+          </div>
+          <div className="dropdown-content">
+            {notifications.map(notification => (
+              <div
+                key={notification.id}
+                className={`notification-item ${notification.unread ? 'unread' : ''}`}
+                onClick={() => markNotificationAsRead(notification.id)}
+              >
+                <div className="notification-content">
+                  <h5>{notification.title}</h5>
+                  <p>{notification.message}</p>
+                  <span className="notification-time">{notification.time}</span>
+                </div>
+                {notification.unread && (
+                  <div className="unread-indicator"></div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="dropdown-footer">
+            <button
+              className="view-all-btn"
+              onClick={handleViewAllNotifications}
+            >
+              View All Notifications
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Dropdown */}
+      {showSettings && (
+        <div className="cosmic-dropdown settings-dropdown">
+          <div className="dropdown-header">
+            <h4>Settings</h4>
+          </div>
+          <div className="dropdown-content">
+            <button
+              className="settings-item"
+              onClick={() => handleSettingsNavigation('account')}
+            >
+              <Users size={16} />
+              <span>Account Settings</span>
+            </button>
+            <button
+              className="settings-item"
+              onClick={() => handleSettingsNavigation('notifications')}
+            >
+              <Bell size={16} />
+              <span>Notification Preferences</span>
+            </button>
+            <button
+              className="settings-item"
+              onClick={() => handleSettingsNavigation('security')}
+            >
+              <Shield size={16} />
+              <span>Security Settings</span>
+            </button>
+            <button
+              className="settings-item"
+              onClick={() => handleSettingsNavigation('system')}
+            >
+              <Settings size={16} />
+              <span>System Configuration</span>
+            </button>
+            <button
+              className="settings-item"
+              onClick={() => handleSettingsNavigation('theme')}
+            >
+              <Palette size={16} />
+              <span>Theme Preferences</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* User Menu Dropdown */}
+      {showUserMenu && (
+        <div className="cosmic-dropdown user-dropdown">
+          <div className="dropdown-header">
+            <div className="user-profile-header">
+              <div className="user-avatar-large">
+                <Users size={24} />
+              </div>
+              <div className="user-details">
+                <h4>Admin User</h4>
+                <p>System Administrator</p>
+                <span className="user-email">admin@azuretobacco.com</span>
+              </div>
+            </div>
+          </div>
+          <div className="dropdown-content">
+            <button
+              className="user-menu-item"
+              onClick={() => handleUserMenuNavigation('profile')}
+            >
+              <Users size={16} />
+              <span>My Profile</span>
+            </button>
+            <button
+              className="user-menu-item"
+              onClick={() => handleUserMenuNavigation('settings')}
+            >
+              <Settings size={16} />
+              <span>Account Settings</span>
+            </button>
+            <button
+              className="user-menu-item"
+              onClick={() => handleUserMenuNavigation('preferences')}
+            >
+              <Bell size={16} />
+              <span>Preferences</span>
+            </button>
+            <button
+              className="user-menu-item"
+              onClick={() => handleUserMenuNavigation('help')}
+            >
+              <HelpCircle size={16} />
+              <span>Help & Support</span>
+            </button>
+            <hr className="dropdown-divider" />
+            <button
+              className="user-menu-item logout-item"
+              onClick={handleLogout}
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+export default App;
+          </div>
+        </div>
+      </header>
+
+      {/* Enhanced Navigation Sidebar with Auto-Minimize */}
+      <div
+        className={`cosmic-sidebar ${sidebarOpen ? 'open' : 'closed'} ${isHoveringLeftEdge ? 'hover-active' : ''}`}
+        onMouseEnter={handleSidebarInteraction}
+        onMouseLeave={handleSidebarInteraction}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Sidebar Content */}
+        <div className="cosmic-sidebar-content">
+          {/* Navigation Items */}
+          <nav className="cosmic-nav">
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                className={`cosmic-nav-item ${activeModule === item.id ? 'active' : ''}`}
+                onClick={() => setActiveModule(item.id)}
+                title={item.name}
+              >
+                <item.icon size={20} />
+                <span>{item.name}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <main className="cosmic-main-content">
+        <div className="cosmic-content-wrapper">
+          {/* Render Active Module */}
+          {renderActiveModule()}
+        </div>
+      </main>
+
+      {/* AI Assistant Modal */}
+      {showAIAssistant && (
+        <div className="cosmic-modal-overlay" onClick={handleAIAssistantClose}>
+          <div className="cosmic-modal" onClick={(e) => e.stopPropagation()}>
+            <AIAssistant onClose={handleAIAssistantClose} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;

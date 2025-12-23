@@ -1,0 +1,2057 @@
+import React, { useState, useEffect } from 'react'
+
+// Theme hook for accessing current theme
+const useTheme = () => {
+  // Get theme from CSS custom properties or default to dark theme colors
+  const isDark = document.documentElement.style.getPropertyValue('--theme-bg')?.includes('#') || true
+  return {
+    type: isDark ? 'dark' : 'light',
+    background: isDark ? '#1a1f3a' : '#ffffff',
+    secondary: isDark ? '#1a1f3a' : '#f8fafc',
+    primary: isDark ? '#0a0e27' : '#ffffff',
+    text: isDark ? '#e2e8f0' : '#6b7280',
+    textLight: isDark ? '#ffffff' : '#1f2937',
+    border: isDark ? '#2d3748' : '#e5e7eb',
+    accent: '#00d4ff'
+  }
+}
+
+interface InventoryItem {
+  id: string
+  name: string
+  sku: string
+  barcode: string
+  category: string
+  currentStock: number
+  minStock: number
+  maxStock: number
+  unitPrice: number
+  totalValue: number
+  location: string
+  batchNumber?: string
+  expiryDate?: string
+  supplier: string
+  lastUpdated: string
+  status: 'in-stock' | 'low-stock' | 'out-of-stock' | 'expired'
+  // White Label Fields
+  brandOwner: 'azure' | 'white-label'
+  clientBrand?: string
+  clientId?: string
+  clientSku?: string
+  productionCost?: number
+  clientPrice?: number
+  reservedForClient?: number
+  availableForClient?: number
+  separateStorage: boolean
+  clientPackaging?: string
+}
+
+interface StockMovement {
+  id: string
+  itemId: string
+  itemName: string
+  type: 'in' | 'out' | 'adjustment'
+  quantity: number
+  reason: string
+  timestamp: string
+  user: string
+  batchNumber?: string
+  // White Label Fields
+  brandOwner: 'azure' | 'white-label'
+  clientBrand?: string
+  clientId?: string
+  transferType?: 'azure-to-client' | 'client-to-azure' | 'internal'
+}
+
+interface FormulaIngredient {
+  itemId: string
+  name: string
+  quantity: number
+  unit: string
+  costPerUnit: number
+  totalCost: number
+}
+
+interface Formula {
+  id: string
+  name: string
+  description: string
+  ingredients: FormulaIngredient[]
+  laborCost: number
+  overheadCost: number
+  totalCost: number
+  sellingPrice: number
+  profitMargin: number
+  batchSize: number
+  lastUpdated: string
+}
+
+interface Expense {
+  id: string
+  category: string
+  description: string
+  amount: number
+  date: string
+  type: 'Fixed' | 'Variable'
+}
+
+interface WhiteLabelClient {
+  id: string
+  name: string
+  contactPerson: string
+  email: string
+  phone: string
+  address: string
+  brandName: string
+  contractStartDate: string
+  contractEndDate: string
+  minimumOrderQuantity: number
+  pricePerUnit: number
+  packagingRequirements: string
+  qualityStandards: string[]
+  deliveryTerms: string
+  paymentTerms: string
+  status: 'active' | 'inactive' | 'pending'
+}
+
+interface BrandInventorySummary {
+  brandOwner: 'azure' | 'white-label'
+  clientBrand?: string
+  totalItems: number
+  totalValue: number
+  lowStockItems: number
+  outOfStockItems: number
+  categories: Record<string, number>
+}
+
+const InventoryManagement: React.FC = () => {
+  const theme = useTheme()
+  const [activeTab, setActiveTab] = useState('items')
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
+  const [stockMovements, setStockMovements] = useState<StockMovement[]>([])
+  const [whiteLabelClients, setWhiteLabelClients] = useState<WhiteLabelClient[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterCategory, setFilterCategory] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterBrandOwner, setFilterBrandOwner] = useState('all')
+  const [filterClient, setFilterClient] = useState('all')
+  const [barcodeInput, setBarcodeInput] = useState('')
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
+  const [showStockAdjustment, setShowStockAdjustment] = useState(false)
+  const [showAddWhiteLabelClient, setShowAddWhiteLabelClient] = useState(false)
+  const [showTransferModal, setShowTransferModal] = useState(false)
+
+  // Load sample data
+  useEffect(() => {
+    loadInventoryData()
+    loadStockMovements()
+    loadWhiteLabelClients()
+  }, [])
+
+  const loadInventoryData = () => {
+    const sampleItems: InventoryItem[] = [
+      // Azure-owned inventory
+      {
+        id: 'inv-001',
+        name: 'Virginia Tobacco Leaves',
+        sku: 'VTL-001',
+        barcode: '1234567890123',
+        category: 'Raw Materials',
+        currentStock: 150,
+        minStock: 50,
+        maxStock: 500,
+        unitPrice: 25.50,
+        totalValue: 3825.00,
+        location: 'Warehouse A-1',
+        batchNumber: 'VTL-2024-001',
+        expiryDate: '2025-12-31',
+        supplier: 'Premium Tobacco Co.',
+        lastUpdated: '2024-01-15T10:30:00Z',
+        status: 'in-stock',
+        brandOwner: 'azure',
+        separateStorage: false
+      },
+      {
+        id: 'inv-002',
+        name: 'Cuban Wrapper Leaves',
+        sku: 'CWL-002',
+        barcode: '1234567890124',
+        category: 'Raw Materials',
+        currentStock: 25,
+        minStock: 30,
+        maxStock: 200,
+        unitPrice: 45.00,
+        totalValue: 1125.00,
+        location: 'Warehouse A-2',
+        batchNumber: 'CWL-2024-002',
+        expiryDate: '2025-06-30',
+        supplier: 'Cuban Tobacco Ltd.',
+        lastUpdated: '2024-01-14T15:45:00Z',
+        status: 'low-stock',
+        brandOwner: 'azure',
+        separateStorage: false
+      },
+      // White label inventory
+      {
+        id: 'inv-wl-001',
+        name: 'Premium Hookah Blend',
+        sku: 'PHB-WL-001',
+        clientSku: 'SMK-PREM-001',
+        barcode: '2234567890123',
+        category: 'Finished Goods',
+        currentStock: 500,
+        minStock: 100,
+        maxStock: 2000,
+        unitPrice: 15.00,
+        totalValue: 7500.00,
+        location: 'Warehouse C-1',
+        batchNumber: 'PHB-2024-WL-001',
+        expiryDate: '2025-08-31',
+        supplier: 'Azure Tobacco Industrial FZCO',
+        lastUpdated: '2024-01-15T14:20:00Z',
+        status: 'in-stock',
+        brandOwner: 'white-label',
+        clientBrand: 'Smokey Dreams',
+        clientId: 'wl-client-001',
+        productionCost: 10.00,
+        clientPrice: 15.00,
+        reservedForClient: 300,
+        availableForClient: 200,
+        separateStorage: true,
+        clientPackaging: 'Custom branded boxes with Smokey Dreams logo'
+      },
+      {
+        id: 'inv-wl-002',
+        name: 'Mint Fusion Tobacco',
+        sku: 'MFT-WL-002',
+        clientSku: 'VP-MINT-002',
+        barcode: '2234567890124',
+        category: 'Finished Goods',
+        currentStock: 800,
+        minStock: 200,
+        maxStock: 3000,
+        unitPrice: 12.00,
+        totalValue: 9600.00,
+        location: 'Warehouse C-2',
+        batchNumber: 'MFT-2024-WL-002',
+        expiryDate: '2025-09-30',
+        supplier: 'Azure Tobacco Industrial FZCO',
+        lastUpdated: '2024-01-14T16:30:00Z',
+        status: 'in-stock',
+        brandOwner: 'white-label',
+        clientBrand: 'Vapor Plus',
+        clientId: 'wl-client-002',
+        productionCost: 8.50,
+        clientPrice: 12.00,
+        reservedForClient: 600,
+        availableForClient: 200,
+        separateStorage: true,
+        clientPackaging: 'Vapor Plus branded packaging with holographic seals'
+      },
+      // Shared raw materials
+      {
+        id: 'inv-003',
+        name: 'Premium Cigar Bands',
+        sku: 'PCB-003',
+        barcode: '1234567890125',
+        category: 'Packaging',
+        currentStock: 5000,
+        minStock: 1000,
+        maxStock: 10000,
+        unitPrice: 0.15,
+        totalValue: 750.00,
+        location: 'Warehouse B-1',
+        supplier: 'Packaging Solutions Inc.',
+        lastUpdated: '2024-01-13T09:20:00Z',
+        status: 'in-stock',
+        brandOwner: 'azure',
+        separateStorage: false
+      }
+    ]
+    setInventoryItems(sampleItems)
+  }
+
+  const loadWhiteLabelClients = () => {
+    const sampleClients: WhiteLabelClient[] = [
+      {
+        id: 'wl-client-001',
+        name: 'Smokey Dreams LLC',
+        contactPerson: 'Ahmed Al-Rashid',
+        email: 'ahmed@smokeydreams.com',
+        phone: '+971-50-123-4567',
+        address: 'Dubai Marina, UAE',
+        brandName: 'Smokey Dreams',
+        contractStartDate: '2024-01-01',
+        contractEndDate: '2024-12-31',
+        minimumOrderQuantity: 1000,
+        pricePerUnit: 15.00,
+        packagingRequirements: 'Premium black boxes with gold foil logo',
+        qualityStandards: ['ISO 9001', 'HACCP', 'Dubai Municipality Approved'],
+        deliveryTerms: 'FOB Dubai',
+        paymentTerms: '30 days net',
+        status: 'active'
+      },
+      {
+        id: 'wl-client-002',
+        name: 'Vapor Plus Trading',
+        contactPerson: 'Sarah Johnson',
+        email: 'sarah@vaporplus.ae',
+        phone: '+971-55-987-6543',
+        address: 'Abu Dhabi, UAE',
+        brandName: 'Vapor Plus',
+        contractStartDate: '2024-02-01',
+        contractEndDate: '2025-01-31',
+        minimumOrderQuantity: 2000,
+        pricePerUnit: 12.00,
+        packagingRequirements: 'Custom holographic packaging with anti-counterfeit features',
+        qualityStandards: ['ISO 9001', 'FDA Approved', 'EU Compliant'],
+        deliveryTerms: 'CIF Abu Dhabi',
+        paymentTerms: '45 days net',
+        status: 'active'
+      },
+      {
+        id: 'wl-client-003',
+        name: 'Premium Smoke Co.',
+        contactPerson: 'Mohammed Hassan',
+        email: 'mohammed@premiumsmoke.qa',
+        phone: '+974-77-555-1234',
+        address: 'Doha, Qatar',
+        brandName: 'Premium Smoke',
+        contractStartDate: '2024-03-01',
+        contractEndDate: '2024-12-31',
+        minimumOrderQuantity: 500,
+        pricePerUnit: 18.00,
+        packagingRequirements: 'Luxury wooden boxes with embossed logo',
+        qualityStandards: ['Qatar Standards', 'ISO 9001', 'Halal Certified'],
+        deliveryTerms: 'DDP Doha',
+        paymentTerms: '15 days net',
+        status: 'pending'
+      }
+    ]
+    setWhiteLabelClients(sampleClients)
+  }
+
+  const loadStockMovements = () => {
+    const sampleMovements: StockMovement[] = [
+      {
+        id: 'mov-001',
+        itemId: 'inv-001',
+        itemName: 'Virginia Tobacco Leaves',
+        type: 'in',
+        quantity: 100,
+        reason: 'New shipment received',
+        timestamp: '2024-01-15T10:30:00Z',
+        user: 'John Smith',
+        batchNumber: 'VTL-2024-001',
+        brandOwner: 'azure'
+      },
+      {
+        id: 'mov-wl-001',
+        itemId: 'inv-wl-001',
+        itemName: 'Premium Hookah Blend',
+        type: 'out',
+        quantity: 200,
+        reason: 'Client order fulfillment',
+        timestamp: '2024-01-14T15:20:00Z',
+        user: 'Sarah Connor',
+        batchNumber: 'PHB-2024-WL-001',
+        brandOwner: 'white-label',
+        clientBrand: 'Smokey Dreams',
+        clientId: 'wl-client-001',
+        transferType: 'client-to-azure'
+      },
+      {
+        id: 'mov-002',
+        itemId: 'inv-002',
+        itemName: 'Cuban Wrapper Leaves',
+        type: 'out',
+        quantity: 50,
+        reason: 'Production consumption',
+        timestamp: '2024-01-14T11:15:00Z',
+        user: 'Mike Johnson',
+        batchNumber: 'CWL-2024-002',
+        brandOwner: 'azure'
+      }
+    ]
+    setStockMovements(sampleMovements)
+  }
+
+  // Calculate brand inventory summaries
+  const getBrandInventorySummaries = (): BrandInventorySummary[] => {
+    const summaries: BrandInventorySummary[] = []
+    
+    // Azure inventory summary
+    const azureItems = inventoryItems.filter(item => item.brandOwner === 'azure')
+    const azureSummary: BrandInventorySummary = {
+      brandOwner: 'azure',
+      totalItems: azureItems.length,
+      totalValue: azureItems.reduce((sum, item) => sum + item.totalValue, 0),
+      lowStockItems: azureItems.filter(item => item.status === 'low-stock').length,
+      outOfStockItems: azureItems.filter(item => item.status === 'out-of-stock').length,
+      categories: azureItems.reduce((acc, item) => {
+        acc[item.category] = (acc[item.category] || 0) + 1
+        return acc
+      }, {} as Record<string, number>)
+    }
+    summaries.push(azureSummary)
+    
+    // White label summaries by client
+    const whiteLabelClients = [...new Set(inventoryItems
+      .filter(item => item.brandOwner === 'white-label')
+      .map(item => item.clientBrand)
+      .filter(Boolean))]
+    
+    whiteLabelClients.forEach(clientBrand => {
+      const clientItems = inventoryItems.filter(item => 
+        item.brandOwner === 'white-label' && item.clientBrand === clientBrand
+      )
+      
+      const clientSummary: BrandInventorySummary = {
+        brandOwner: 'white-label',
+        clientBrand,
+        totalItems: clientItems.length,
+        totalValue: clientItems.reduce((sum, item) => sum + item.totalValue, 0),
+        lowStockItems: clientItems.filter(item => item.status === 'low-stock').length,
+        outOfStockItems: clientItems.filter(item => item.status === 'out-of-stock').length,
+        categories: clientItems.reduce((acc, item) => {
+          acc[item.category] = (acc[item.category] || 0) + 1
+          return acc
+        }, {} as Record<string, number>)
+      }
+      summaries.push(clientSummary)
+    })
+    
+    return summaries
+  }
+
+  const filteredItems = inventoryItems.filter(item => {
+    const matchesSearch = searchTerm === '' || 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.clientSku && item.clientSku.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.clientBrand && item.clientBrand.toLowerCase().includes(searchTerm.toLowerCase()))
+    
+    const matchesCategory = filterCategory === 'all' || item.category === filterCategory
+    const matchesStatus = filterStatus === 'all' || item.status === filterStatus
+    const matchesBrandOwner = filterBrandOwner === 'all' || item.brandOwner === filterBrandOwner
+    const matchesClient = filterClient === 'all' || item.clientBrand === filterClient
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesBrandOwner && matchesClient
+  })
+
+  // Calculate overview metrics
+  const totalValue = inventoryItems.reduce((sum, item) => sum + item.totalValue, 0)
+  const lowStockItems = inventoryItems.filter(item => item.status === 'low-stock' || item.status === 'out-of-stock').length
+  const totalItems = inventoryItems.length
+  const categories = [...new Set(inventoryItems.map(item => item.category))]
+
+  // Barcode scanning simulation
+  const handleBarcodeInput = (barcode: string) => {
+    const item = inventoryItems.find(item => item.barcode === barcode)
+    if (item) {
+      setSelectedItem(item)
+      setShowStockAdjustment(true)
+      setBarcodeInput('')
+    } else {
+      alert('Item not found with barcode: ' + barcode)
+    }
+  }
+
+  // Stock adjustment
+  const handleStockAdjustment = (itemId: string, adjustment: number, reason: string) => {
+    setInventoryItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const newStock = Math.max(0, item.currentStock + adjustment)
+        const newStatus = newStock === 0 ? 'out-of-stock' : 
+                         newStock <= item.minStock ? 'low-stock' : 'in-stock'
+        
+        // Add stock movement record
+        const movement: StockMovement = {
+          id: `mov-${Date.now()}`,
+          itemId: item.id,
+          itemName: item.name,
+          type: adjustment > 0 ? 'in' : 'out',
+          quantity: Math.abs(adjustment),
+          reason,
+          timestamp: new Date().toISOString(),
+          user: 'Current User',
+          brandOwner: item.brandOwner,
+          clientBrand: item.clientBrand,
+          clientId: item.clientId
+        }
+        setStockMovements(prev => [movement, ...prev])
+
+        return {
+          ...item,
+          currentStock: newStock,
+          totalValue: newStock * item.unitPrice,
+          status: newStatus,
+          lastUpdated: new Date().toISOString()
+        }
+      }
+      return item
+    }))
+    setShowStockAdjustment(false)
+    setSelectedItem(null)
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'in-stock': return '#10b981'
+      case 'low-stock': return '#f59e0b'
+      case 'out-of-stock': return '#ef4444'
+      case 'expired': return '#8b5cf6'
+      default: return '#6b7280'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'in-stock': return '✅'
+      case 'low-stock': return '⚠️'
+      case 'out-of-stock': return '❌'
+      case 'expired': return '⏰'
+      default: return '❓'
+    }
+  }
+
+  // Items Tab with enhanced features
+  const renderItems = () => (
+    <div style={{ padding: '2rem' }}>
+      {/* Search and Filters */}
+      <div style={{
+        background: theme.secondary,
+        borderRadius: '16px',
+        padding: '1.5rem',
+        marginBottom: '2rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Search by name, SKU, or barcode..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: '0.75rem',
+              border: `2px solid ${theme.border}`,
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              background: theme.primary,
+              color: theme.textLight
+            }}
+          />
+          
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            style={{
+              padding: '0.75rem',
+              border: `2px solid ${theme.border}`,
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              background: theme.primary,
+              color: theme.textLight
+            }}
+          >
+            <option value="all">All Categories</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{
+              padding: '0.75rem',
+              border: `2px solid ${theme.border}`,
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              background: theme.primary,
+              color: theme.textLight
+            }}
+          >
+            <option value="all">All Status</option>
+            <option value="in-stock">In Stock</option>
+            <option value="low-stock">Low Stock</option>
+            <option value="out-of-stock">Out of Stock</option>
+            <option value="expired">Expired</option>
+          </select>
+
+          <select
+            value={filterBrandOwner}
+            onChange={(e) => setFilterBrandOwner(e.target.value)}
+            style={{
+              padding: '0.75rem',
+              border: `2px solid ${theme.border}`,
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              background: theme.primary,
+              color: theme.textLight
+            }}
+          >
+            <option value="all">All Brands</option>
+            <option value="azure">🏢 Azure Only</option>
+            <option value="white-label">🏷️ White Label Only</option>
+          </select>
+
+          <select
+            value={filterClient}
+            onChange={(e) => setFilterClient(e.target.value)}
+            style={{
+              padding: '0.75rem',
+              border: `2px solid ${theme.border}`,
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              background: theme.primary,
+              color: theme.textLight
+            }}
+          >
+            <option value="all">All Clients</option>
+            {[...new Set(inventoryItems
+              .filter(item => item.clientBrand)
+              .map(item => item.clientBrand)
+            )].map(brand => (
+              <option key={brand} value={brand}>{brand}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Items Table */}
+      <div style={{
+        background: theme.secondary,
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #4dd0e1, #26c6da)',
+          color: 'white',
+          padding: '1rem 1.5rem',
+          fontSize: '1.1rem',
+          fontWeight: '700'
+        }}>
+          📦 Inventory Items ({filteredItems.length})
+        </div>
+        
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: theme.primary }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Item</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>SKU/Barcode</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Brand Owner</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Category</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Stock</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Value</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Location</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Status</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((item, index) => (
+                <tr key={item.id} style={{
+                  borderBottom: `1px solid ${theme.border}`,
+                  background: index % 2 === 0 ? theme.secondary : theme.primary
+                }}>
+                  <td style={{ padding: '1rem' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', color: theme.textLight }}>{item.name}</div>
+                      {item.batchNumber && (
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          Batch: {item.batchNumber}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ fontSize: '0.9rem', color: theme.textLight }}>{item.sku}</div>
+                    <div style={{ fontSize: '0.8rem', color: theme.text }}>{item.barcode}</div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      marginBottom: '0.25rem'
+                    }}>
+                      <span style={{
+                        background: item.brandOwner === 'azure' ? '#4dd0e1' : '#f59e0b',
+                        color: 'white',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '12px',
+                        fontSize: '0.7rem',
+                        fontWeight: '600'
+                      }}>
+                        {item.brandOwner === 'azure' ? '🏢 AZURE' : '🏷️ WHITE LABEL'}
+                      </span>
+                    </div>
+                    {item.clientBrand && (
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                        Client: {item.clientBrand}
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>{item.category}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <div style={{ color: theme.textLight }}>{item.currentStock}</div>
+                    <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                      Min: {item.minStock} | Max: {item.maxStock}
+                    </div>
+                  </td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>
+                    ${item.totalValue.toLocaleString()}
+                  </td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>{item.location}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <span style={{
+                      background: getStatusColor(item.status),
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '20px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600'
+                    }}>
+                      {getStatusIcon(item.status)} {item.status.replace('-', ' ').toUpperCase()}
+                    </span>
+                    {item.separateStorage && (
+                      <div style={{ 
+                        fontSize: '0.7rem', 
+                        color: '#f59e0b', 
+                        marginTop: '0.25rem',
+                        fontWeight: '600'
+                      }}>
+                        🏠 SEPARATE STORAGE
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <button
+                      onClick={() => {
+                        setSelectedItem(item)
+                        setShowStockAdjustment(true)
+                      }}
+                      style={{
+                        background: '#4dd0e1',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '0.5rem 1rem',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        fontWeight: '600'
+                      }}
+                    >
+                      Adjust Stock
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Stock Movements Tab
+  const renderMovements = () => (
+    <div style={{ padding: '2rem' }}>
+      <div style={{
+        background: theme.secondary,
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #10b981, #059669)',
+          color: 'white',
+          padding: '1rem 1.5rem',
+          fontSize: '1.1rem',
+          fontWeight: '700'
+        }}>
+          📊 Stock Movements ({stockMovements.length})
+        </div>
+        
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: theme.primary }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Date/Time</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Item</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Type</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Quantity</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Reason</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>User</th>
+                <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Batch</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stockMovements.map((movement, index) => (
+                <tr key={movement.id} style={{
+                  borderBottom: `1px solid ${theme.border}`,
+                  background: index % 2 === 0 ? theme.secondary : theme.primary
+                }}>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>
+                    {new Date(movement.timestamp).toLocaleString()}
+                  </td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>{movement.itemName}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <span style={{
+                      background: movement.type === 'in' ? '#10b981' : movement.type === 'out' ? '#ef4444' : '#f59e0b',
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '20px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600'
+                    }}>
+                      {movement.type === 'in' ? '📥 IN' : movement.type === 'out' ? '📤 OUT' : '⚖️ ADJ'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>{movement.quantity}</td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>{movement.reason}</td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>{movement.user}</td>
+                  <td style={{ padding: '1rem', color: theme.textLight }}>
+                    {movement.batchNumber || '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Reports Tab with comprehensive analytics
+  const renderReports = () => (
+    <div style={{ padding: '2rem' }}>
+      {/* Report Summary Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem'
+      }}>
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: '#10b981', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+            📊 Inventory Turnover
+          </h3>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+            4.2x
+          </div>
+          <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+            Average annual turnover rate
+          </div>
+          <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#10b981' }}>
+            ↗️ +12% vs last year
+          </div>
+        </div>
+
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: '#3b82f6', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+            💰 Carrying Cost
+          </h3>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+            $12.5K
+          </div>
+          <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+            Monthly carrying costs
+          </div>
+          <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#f59e0b' }}>
+            ↗️ +5% vs last month
+          </div>
+        </div>
+
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: '#8b5cf6', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+            📈 Stock Accuracy
+          </h3>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+            98.7%
+          </div>
+          <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+            Inventory accuracy rate
+          </div>
+          <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#10b981' }}>
+            ↗️ +2.1% vs last month
+          </div>
+        </div>
+
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+            ⚠️ Stockout Risk
+          </h3>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+            3
+          </div>
+          <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+            Items at risk of stockout
+          </div>
+          <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#ef4444' }}>
+            ⚠️ Requires attention
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed Reports */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gap: '2rem'
+      }}>
+        {/* Category Performance */}
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: theme.textLight, marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: '700' }}>
+            📊 Category Performance
+          </h3>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {categories.map((category, index) => {
+              const categoryItems = inventoryItems.filter(item => item.category === category)
+              const categoryValue = categoryItems.reduce((sum, item) => sum + item.totalValue, 0)
+              const percentage = (categoryValue / totalValue * 100).toFixed(1)
+              
+              return (
+                <div key={category} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.75rem',
+                  background: theme.primary,
+                  borderRadius: '8px'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: '600', color: theme.textLight }}>{category}</div>
+                    <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                      {categoryItems.length} items
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: '600', color: theme.textLight }}>
+                      ${categoryValue.toLocaleString()}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                      {percentage}%
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Top Moving Items */}
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          padding: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: theme.textLight, marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: '700' }}>
+            🚀 Top Moving Items
+          </h3>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {inventoryItems
+              .sort((a, b) => b.totalValue - a.totalValue)
+              .slice(0, 5)
+              .map((item, index) => (
+                <div key={item.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.75rem',
+                  background: theme.primary,
+                  borderRadius: '8px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      background: '#10b981',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '0.8rem',
+                      fontWeight: '700'
+                    }}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '600', color: theme.textLight }}>{item.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>{item.sku}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: '600', color: theme.textLight }}>
+                      ${item.totalValue.toLocaleString()}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                      {item.currentStock} units
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Export Options */}
+      <div style={{
+        marginTop: '2rem',
+        background: theme.secondary,
+        borderRadius: '16px',
+        padding: '1.5rem',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+      }}>
+        <h3 style={{ color: theme.textLight, marginBottom: '1rem', fontSize: '1.2rem', fontWeight: '700' }}>
+          📄 Export Reports
+        </h3>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {[
+            { name: 'Inventory Summary', format: 'PDF', color: '#ef4444' },
+            { name: 'Stock Movement Report', format: 'Excel', color: '#10b981' },
+            { name: 'Category Analysis', format: 'CSV', color: '#3b82f6' },
+            { name: 'Supplier Performance', format: 'PDF', color: '#8b5cf6' }
+          ].map(report => (
+            <button
+              key={report.name}
+              style={{
+                background: report.color,
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '0.75rem 1rem',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+              📊 {report.name} ({report.format})
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  // White Label Management Tab
+  const renderWhiteLabel = () => {
+    const brandSummaries = getBrandInventorySummaries()
+
+    return (
+      <div style={{ padding: '2rem' }}>
+        {/* Brand Inventory Overview */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          {brandSummaries.map((summary, index) => (
+            <div key={index} style={{
+              background: theme.secondary,
+              borderRadius: '16px',
+              padding: '1.5rem',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              border: summary.brandOwner === 'azure' ? '2px solid #4dd0e1' : '2px solid #f59e0b'
+            }}>
+              <h3 style={{ 
+                color: summary.brandOwner === 'azure' ? '#4dd0e1' : '#f59e0b', 
+                marginBottom: '1rem', 
+                fontSize: '1.1rem', 
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                {summary.brandOwner === 'azure' ? '🏢' : '🏷️'} 
+                {summary.brandOwner === 'azure' ? 'Azure Inventory' : `${summary.clientBrand} (White Label)`}
+              </h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                <div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '700', color: theme.textLight }}>
+                    {summary.totalItems}
+                  </div>
+                  <div style={{ color: theme.text, fontSize: '0.8rem' }}>Total Items</div>
+                </div>
+                
+                <div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '700', color: theme.textLight }}>
+                    ${summary.totalValue.toLocaleString()}
+                  </div>
+                  <div style={{ color: theme.text, fontSize: '0.8rem' }}>Total Value</div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#ef4444' }}>
+                    {summary.lowStockItems}
+                  </div>
+                  <div style={{ color: theme.text, fontSize: '0.7rem' }}>Low Stock</div>
+                </div>
+                
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: '600', color: '#dc2626' }}>
+                    {summary.outOfStockItems}
+                  </div>
+                  <div style={{ color: theme.text, fontSize: '0.7rem' }}>Out of Stock</div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '1rem' }}>
+                <h4 style={{ color: theme.textLight, fontSize: '0.9rem', marginBottom: '0.5rem' }}>Categories:</h4>
+                {Object.entries(summary.categories).map(([category, count]) => (
+                  <div key={category} style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    marginBottom: '0.25rem',
+                    fontSize: '0.8rem',
+                    color: theme.text
+                  }}>
+                    <span>{category}</span>
+                    <span>{count} items</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* White Label Clients Management */}
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>🏷️ White Label Clients ({whiteLabelClients.length})</span>
+            <button
+              onClick={() => setShowAddWhiteLabelClient(true)}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                color: 'white',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '0.9rem'
+              }}
+            >
+              + Add Client
+            </button>
+          </div>
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: theme.primary }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Client</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Brand</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Contact</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Contract</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Pricing</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Status</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {whiteLabelClients.map((client, index) => (
+                  <tr key={client.id} style={{
+                    borderBottom: `1px solid ${theme.border}`,
+                    background: index % 2 === 0 ? theme.secondary : theme.primary
+                  }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', color: theme.textLight }}>{client.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>{client.address}</div>
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ 
+                        fontWeight: '600', 
+                        color: '#f59e0b',
+                        background: 'rgba(245, 158, 11, 0.1)',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        display: 'inline-block'
+                      }}>
+                        {client.brandName}
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ color: theme.textLight }}>{client.contactPerson}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>{client.email}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>{client.phone}</div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontSize: '0.8rem', color: theme.textLight }}>
+                        {new Date(client.contractStartDate).toLocaleDateString()} - {new Date(client.contractEndDate).toLocaleDateString()}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                        MOQ: {client.minimumOrderQuantity} units
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ color: theme.textLight }}>${client.pricePerUnit.toFixed(2)}/unit</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>{client.paymentTerms}</div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        background: client.status === 'active' ? '#10b981' : 
+                                   client.status === 'pending' ? '#f59e0b' : '#6b7280',
+                        color: 'white',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '20px',
+                        fontSize: '0.8rem',
+                        fontWeight: '600'
+                      }}>
+                        {client.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button style={{
+                          background: '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '0.25rem 0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem'
+                        }}>
+                          View
+                        </button>
+                        <button style={{
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '0.25rem 0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem'
+                        }}>
+                          Orders
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Brand-Specific Inventory */}
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #4dd0e1, #00acc1)',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>📦 Brand-Separated Inventory</span>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <select
+                value={filterBrandOwner}
+                onChange={(e) => setFilterBrandOwner(e.target.value)}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem'
+                }}
+              >
+                <option value="all" style={{ color: '#000' }}>All Brands</option>
+                <option value="azure" style={{ color: '#000' }}>Azure Only</option>
+                <option value="white-label" style={{ color: '#000' }}>White Label Only</option>
+              </select>
+              
+              <select
+                value={filterClient}
+                onChange={(e) => setFilterClient(e.target.value)}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.5rem',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem'
+                }}
+              >
+                <option value="all" style={{ color: '#000' }}>All Clients</option>
+                {[...new Set(inventoryItems
+                  .filter(item => item.clientBrand)
+                  .map(item => item.clientBrand)
+                )].map(brand => (
+                  <option key={brand} value={brand} style={{ color: '#000' }}>{brand}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: theme.primary }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Item</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Brand Owner</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Stock</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Allocation</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Pricing</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredItems.map((item, index) => (
+                  <tr key={item.id} style={{
+                    borderBottom: `1px solid ${theme.border}`,
+                    background: index % 2 === 0 ? theme.secondary : theme.primary
+                  }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', color: theme.textLight }}>{item.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          SKU: {item.sku} {item.clientSku && `| Client SKU: ${item.clientSku}`}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          Location: {item.location}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.5rem',
+                        marginBottom: '0.25rem'
+                      }}>
+                        <span style={{
+                          background: item.brandOwner === 'azure' ? '#4dd0e1' : '#f59e0b',
+                          color: 'white',
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: '12px',
+                          fontSize: '0.7rem',
+                          fontWeight: '600'
+                        }}>
+                          {item.brandOwner === 'azure' ? '🏢 AZURE' : '🏷️ WHITE LABEL'}
+                        </span>
+                      </div>
+                      {item.clientBrand && (
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          Client: {item.clientBrand}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ color: theme.textLight }}>{item.currentStock}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                        Min: {item.minStock} | Max: {item.maxStock}
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      {item.brandOwner === 'white-label' && item.reservedForClient && item.availableForClient ? (
+                        <div>
+                          <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                            Reserved: {item.reservedForClient}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                            Available: {item.availableForClient}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          Available: {item.currentStock}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ color: theme.textLight }}>${item.unitPrice.toFixed(2)}</div>
+                      {item.productionCost && item.clientPrice && (
+                        <div>
+                          <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                            Cost: ${item.productionCost.toFixed(2)}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                            Client: ${item.clientPrice.toFixed(2)}
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        background: getStatusColor(item.status),
+                        color: 'white',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '20px',
+                        fontSize: '0.8rem',
+                        fontWeight: '600'
+                      }}>
+                        {getStatusIcon(item.status)} {item.status.replace('-', ' ').toUpperCase()}
+                      </span>
+                      {item.separateStorage && (
+                        <div style={{ 
+                          fontSize: '0.7rem', 
+                          color: '#f59e0b', 
+                          marginTop: '0.25rem',
+                          fontWeight: '600'
+                        }}>
+                          🏠 SEPARATE STORAGE
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Suppliers Tab with comprehensive supplier management
+  const renderSuppliers = () => {
+    const theme = useTheme()  // Add theme hook here
+    const suppliers = [
+      {
+        id: 'sup-001',
+        name: 'Premium Tobacco Co.',
+        contact: 'Ahmed Al-Mansouri',
+        email: 'ahmed@premiumtobacco.ae',
+        phone: '+971-4-555-0123',
+        location: 'Dubai, UAE',
+        rating: 4.8,
+        totalOrders: 45,
+        totalValue: 125000,
+        onTimeDelivery: 96.5,
+        qualityScore: 98.2,
+        lastOrder: '2024-01-15',
+        status: 'active',
+        categories: ['Raw Materials'],
+        paymentTerms: 'Net 30'
+      },
+      {
+        id: 'sup-002',
+        name: 'Cuban Tobacco Ltd.',
+        contact: 'Maria Rodriguez',
+        email: 'maria@cubantobacco.com',
+        phone: '+53-7-555-0456',
+        location: 'Havana, Cuba',
+        rating: 4.9,
+        totalOrders: 28,
+        totalValue: 89000,
+        onTimeDelivery: 94.2,
+        qualityScore: 99.1,
+        lastOrder: '2024-01-14',
+        status: 'active',
+        categories: ['Raw Materials'],
+        paymentTerms: 'Net 45'
+      },
+      {
+        id: 'sup-003',
+        name: 'Packaging Solutions Inc.',
+        contact: 'John Smith',
+        email: 'john@packagingsolutions.com',
+        phone: '+1-555-0789',
+        location: 'New York, USA',
+        rating: 4.6,
+        totalOrders: 67,
+        totalValue: 45000,
+        onTimeDelivery: 98.1,
+        qualityScore: 95.8,
+        lastOrder: '2024-01-13',
+        status: 'active',
+        categories: ['Packaging'],
+        paymentTerms: 'Net 15'
+      },
+      {
+        id: 'sup-004',
+        name: 'Luxury Packaging Co.',
+        contact: 'Sophie Laurent',
+        email: 'sophie@luxurypack.fr',
+        phone: '+33-1-555-0321',
+        location: 'Paris, France',
+        rating: 4.7,
+        totalOrders: 23,
+        totalValue: 67000,
+        onTimeDelivery: 92.8,
+        qualityScore: 97.5,
+        lastOrder: '2024-01-12',
+        status: 'active',
+        categories: ['Packaging'],
+        paymentTerms: 'Net 30'
+      }
+    ]
+
+    return (
+      <div style={{ padding: '2rem' }}>
+        {/* Supplier Overview */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            background: theme.secondary,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <h3 style={{ color: '#10b981', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+              🤝 Active Suppliers
+            </h3>
+            <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+              {suppliers.length}
+            </div>
+            <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+              Verified and active
+            </div>
+          </div>
+
+          <div style={{
+            background: theme.secondary,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <h3 style={{ color: '#3b82f6', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+              ⭐ Average Rating
+            </h3>
+            <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+              {(suppliers.reduce((sum, s) => sum + s.rating, 0) / suppliers.length).toFixed(1)}
+            </div>
+            <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+              Out of 5.0 stars
+            </div>
+          </div>
+
+          <div style={{
+            background: theme.secondary,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <h3 style={{ color: '#8b5cf6', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+              🚚 On-Time Delivery
+            </h3>
+            <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+              {(suppliers.reduce((sum, s) => sum + s.onTimeDelivery, 0) / suppliers.length).toFixed(1)}%
+            </div>
+            <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+              Average performance
+            </div>
+          </div>
+
+          <div style={{
+            background: theme.secondary,
+            borderRadius: '16px',
+            padding: '1.5rem',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          }}>
+            <h3 style={{ color: '#f59e0b', marginBottom: '1rem', fontSize: '1.1rem', fontWeight: '700' }}>
+              💰 Total Spend
+            </h3>
+            <div style={{ fontSize: '2rem', fontWeight: '700', color: theme.textLight, marginBottom: '0.5rem' }}>
+              ${(suppliers.reduce((sum, s) => sum + s.totalValue, 0) / 1000).toFixed(0)}K
+            </div>
+            <div style={{ color: theme.text, fontSize: '0.9rem' }}>
+              This year
+            </div>
+          </div>
+        </div>
+
+        {/* Suppliers Table */}
+        <div style={{
+          background: theme.secondary,
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            fontSize: '1.1rem',
+            fontWeight: '700'
+          }}>
+            🤝 Supplier Management ({suppliers.length})
+          </div>
+          
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: theme.primary }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Supplier</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Contact</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Performance</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Orders</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Value</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Status</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: theme.textLight }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {suppliers.map((supplier, index) => (
+                  <tr key={supplier.id} style={{
+                    borderBottom: `1px solid ${theme.border}`,
+                    background: index % 2 === 0 ? theme.secondary : theme.primary
+                  }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', color: theme.textLight }}>{supplier.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          {supplier.location}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                          {supplier.categories.join(', ')}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontSize: '0.9rem', color: theme.textLight }}>{supplier.contact}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>{supplier.email}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>{supplier.phone}</div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <span style={{ color: theme.textLight }}>Rating:</span>
+                        <span style={{ color: '#f59e0b' }}>{'⭐'.repeat(Math.floor(supplier.rating))}</span>
+                        <span style={{ color: theme.textLight, fontSize: '0.8rem' }}>{supplier.rating}</span>
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                        On-time: {supplier.onTimeDelivery}%
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                        Quality: {supplier.qualityScore}%
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ color: theme.textLight }}>{supplier.totalOrders}</div>
+                      <div style={{ fontSize: '0.8rem', color: theme.text }}>
+                        Last: {new Date(supplier.lastOrder).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem', color: theme.textLight }}>
+                      ${supplier.totalValue.toLocaleString()}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        background: supplier.status === 'active' ? '#10b981' : '#6b7280',
+                        color: 'white',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '20px',
+                        fontSize: '0.8rem',
+                        fontWeight: '600'
+                      }}>
+                        {supplier.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button style={{
+                          background: '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '0.25rem 0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem'
+                        }}>
+                          View
+                        </button>
+                        <button style={{
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '0.25rem 0.5rem',
+                          cursor: 'pointer',
+                          fontSize: '0.7rem'
+                        }}>
+                          Order
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: theme.background }}>
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(135deg, #4dd0e1, #26c6da)',
+        color: 'white',
+        padding: '2rem',
+        textAlign: 'center'
+      }}>
+        <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>
+          📦 Advanced Inventory Management
+        </h1>
+        <p style={{ margin: '0.5rem 0 0 0', opacity: 0.9 }}>
+          Real-time inventory tracking with barcode scanning and automated alerts
+        </p>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div style={{
+        background: theme.secondary,
+        borderBottom: `1px solid ${theme.border}`,
+        padding: '0 2rem'
+      }}>
+        <div style={{
+          display: 'flex',
+          gap: '0.5rem',
+          marginBottom: '2rem',
+          borderBottom: `2px solid ${theme.border}`,
+          paddingBottom: '1rem',
+          overflowX: 'auto'
+        }}>
+          {[
+            { id: 'items', label: '📦 Items', icon: '📦' },
+            { id: 'movements', label: '📈 Movements', icon: '📈' },
+            { id: 'reports', label: '📋 Reports', icon: '📋' },
+            { id: 'white-label', label: '🏷️ White Label', icon: '🏷️' },
+            { id: 'suppliers', label: '🤝 Suppliers', icon: '🤝' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '1rem 0',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: activeTab === tab.id ? '#4dd0e1' : '#6b7280',
+                borderBottom: activeTab === tab.id ? '2px solid #4dd0e1' : '2px solid transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div>
+        {activeTab === 'items' && renderItems()}
+        {activeTab === 'movements' && renderMovements()}
+        {activeTab === 'reports' && renderReports()}
+        {activeTab === 'white-label' && renderWhiteLabel()}
+        {activeTab === 'suppliers' && renderSuppliers()}
+      </div>
+
+      {/* Barcode Scanner Modal */}
+      {showBarcodeScanner && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '90%'
+          }}>
+            <h3 style={{ marginBottom: '1rem', color: '#1f2937' }}>📷 Barcode Scanner</h3>
+            <input
+              type="text"
+              placeholder="Enter or scan barcode..."
+              value={barcodeInput}
+              onChange={(e) => setBarcodeInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && barcodeInput.trim()) {
+                  handleBarcodeInput(barcodeInput.trim())
+                  setShowBarcodeScanner(false)
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                marginBottom: '1rem'
+              }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                onClick={() => {
+                  if (barcodeInput.trim()) {
+                    handleBarcodeInput(barcodeInput.trim())
+                    setShowBarcodeScanner(false)
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  background: '#4dd0e1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                Search
+              </button>
+              <button
+                onClick={() => {
+                  setShowBarcodeScanner(false)
+                  setBarcodeInput('')
+                }}
+                style={{
+                  flex: 1,
+                  background: '#6b7280',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '0.75rem',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stock Adjustment Modal */}
+      {showStockAdjustment && selectedItem && (
+        <StockAdjustmentModal
+          item={selectedItem}
+          onAdjust={handleStockAdjustment}
+          onClose={() => {
+            setShowStockAdjustment(false)
+            setSelectedItem(null)
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+// Stock Adjustment Modal Component
+interface StockAdjustmentModalProps {
+  item: InventoryItem
+  onAdjust: (itemId: string, adjustment: number, reason: string) => void
+  onClose: () => void
+}
+
+const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({ item, onAdjust, onClose }) => {
+  const [adjustment, setAdjustment] = useState(0)
+  const [reason, setReason] = useState('')
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '16px',
+        padding: '2rem',
+        maxWidth: '500px',
+        width: '90%'
+      }}>
+        <h3 style={{ marginBottom: '1rem', color: '#1f2937' }}>
+          ⚖️ Stock Adjustment - {item.name}
+        </h3>
+        
+        <div style={{ marginBottom: '1rem', padding: '1rem', background: '#f3f4f6', borderRadius: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <strong>Current Stock:</strong> {item.currentStock}
+            </div>
+            <div>
+              <strong>SKU:</strong> {item.sku}
+            </div>
+            <div>
+              <strong>Location:</strong> {item.location}
+            </div>
+            <div>
+              <strong>Min Stock:</strong> {item.minStock}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+            Adjustment Quantity (+ for increase, - for decrease):
+          </label>
+          <input
+            type="number"
+            value={adjustment}
+            onChange={(e) => setAdjustment(parseInt(e.target.value) || 0)}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              border: '2px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '1rem'
+            }}
+          />
+          <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.25rem' }}>
+            New stock will be: {Math.max(0, item.currentStock + adjustment)}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+            Reason for adjustment:
+          </label>
+          <select
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              border: '2px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '1rem'
+            }}
+          >
+            <option value="">Select reason...</option>
+            <option value="Physical count adjustment">Physical count adjustment</option>
+            <option value="Damaged goods">Damaged goods</option>
+            <option value="Expired items">Expired items</option>
+            <option value="Production consumption">Production consumption</option>
+            <option value="Sales return">Sales return</option>
+            <option value="Supplier return">Supplier return</option>
+            <option value="Transfer between locations">Transfer between locations</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button
+            onClick={() => {
+              if (adjustment !== 0 && reason) {
+                onAdjust(item.id, adjustment, reason)
+              } else {
+                alert('Please enter an adjustment quantity and select a reason.')
+              }
+            }}
+            style={{
+              flex: 1,
+              background: '#4dd0e1',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            Apply Adjustment
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1,
+              background: '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.75rem',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default InventoryManagement 

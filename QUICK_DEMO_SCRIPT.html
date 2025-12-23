@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Demo Script - Modern ERP System</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1in;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            font-size: 13px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border-left: 4px solid #06b6d4;
+            border-radius: 0 6px 6px 0;
+            page-break-inside: avoid;
+        }
+        
+        .time-marker {
+            background: #1e293b;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-right: 1rem;
+            min-width: 80px;
+            text-align: center;
+            align-self: flex-start;
+        }
+        
+        .action-content {
+            flex: 1;
+        }
+        
+        .action-title {
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        
+        .action-description {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #06b6d4;
+        }
+        
+        .quick-tips {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        .quick-tips h3 {
+            color: #0369a1;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .quick-tips ul {
+            margin-left: 1.5rem;
+        }
+        
+        .quick-tips li {
+            margin: 0.25rem 0;
+            color: #1e40af;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-top: 2px solid #06b6d4;
+            margin-top: 2rem;
+            border-radius: 6px;
+        }
+        
+        @media print {
+            .timeline-item {
+                page-break-inside: avoid;
+            }
+            
+            body {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Quick Demo Script</h1>
+        <p>Modern ERP System - 5-Minute Production Management Showcase</p>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Rapid Demonstration Timeline</h2>
+        
+        <div class="timeline-item">
+            <div class="time-marker">0:00-0:30</div>
+            <div class="action-content">
+                <div class="action-title">System Introduction & Navigation</div>
+                <div class="action-description">Open localhost:5173, showcase main dashboard, highlight modern UI, click Production Management</div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="time-marker">0:30-1:30</div>
+            <div class="action-content">
+                <div class="action-title">Overview Dashboard Deep Dive</div>
+                <div class="action-description">Show real-time metrics (94.2% efficiency, 99.1% quality), active orders section, station status overview</div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="time-marker">1:30-2:45</div>
+            <div class="action-content">
+                <div class="action-title">Production Orders Management</div>
+                <div class="action-description">Switch to Orders tab, showcase 3 sample orders, demonstrate stage tracking, open "New Order" modal</div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="time-marker">2:45-3:30</div>
+            <div class="action-content">
+                <div class="action-title">Batch Management Features</div>
+                <div class="action-description">Navigate to Batches, show filtering capabilities, progress visualization, quick batch creation demo</div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="time-marker">3:30-4:30</div>
+            <div class="action-content">
+                <div class="action-title">Work Stations Monitoring</div>
+                <div class="action-description">Access Stations tab, highlight utilization bars, maintenance alerts, station configuration modal</div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="time-marker">4:30-5:00</div>
+            <div class="action-content">
+                <div class="action-title">System Integration Summary</div>
+                <div class="action-description">Return to overview, emphasize real-time updates, close with key benefits and call-to-action</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Key Talking Points</h2>
+        
+        <div class="quick-tips">
+            <h3>💡 Essential Messages</h3>
+            <ul>
+                <li><strong>Real-Time Intelligence:</strong> "Live production metrics and instant decision-making capabilities"</li>
+                <li><strong>Complete Order Lifecycle:</strong> "From planning to delivery - track every stage with precision"</li>
+                <li><strong>Smart Equipment Management:</strong> "Proactive maintenance and utilization optimization"</li>
+                <li><strong>Quality Assurance:</strong> "Integrated quality control with 99.1% success rate"</li>
+                <li><strong>Modern Interface:</strong> "Intuitive design that reduces training time and increases productivity"</li>
+            </ul>
+        </div>
+        
+        <div class="quick-tips">
+            <h3>🔥 Impact Statements</h3>
+            <ul>
+                <li>"Reduce production downtime by up to 30% with predictive maintenance"</li>
+                <li>"Achieve 96.8% on-time delivery with smart scheduling"</li>
+                <li>"Increase overall equipment effectiveness to 94.2%"</li>
+                <li>"Streamline operations with unified production visibility"</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Demo Data Quick Reference</h2>
+        
+        <div class="quick-tips">
+            <h3>📋 Sample Orders</h3>
+            <ul>
+                <li><strong>PROD-2024-001:</strong> Premium Tobacco Blend A (High Priority, In Progress)</li>
+                <li><strong>PROD-2024-002:</strong> Classic Tobacco Mix (Medium Priority, Quality Check)</li>
+                <li><strong>PROD-2024-003:</strong> Oriental Premium (Urgent Priority, Planned)</li>
+            </ul>
+        </div>
+        
+        <div class="quick-tips">
+            <h3>🏭 Work Stations</h3>
+            <ul>
+                <li><strong>Blending Station 1:</strong> 85% utilization - Currently active</li>
+                <li><strong>Curing Chamber A:</strong> 0% utilization - Available for next batch</li>
+                <li><strong>Packaging Line 1:</strong> 0% utilization - Scheduled maintenance</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎬 Presentation Tips</h2>
+        
+        <div class="quick-tips">
+            <h3>📺 For Video Recording</h3>
+            <ul>
+                <li>Use 1920x1080 resolution for crisp quality</li>
+                <li>Maintain steady mouse movements</li>
+                <li>Pause briefly on key metrics and features</li>
+                <li>Keep narration pace at 150-170 words per minute</li>
+            </ul>
+        </div>
+        
+        <div class="quick-tips">
+            <h3>🎤 For Live Demos</h3>
+            <ul>
+                <li>Have backup browser tab ready</li>
+                <li>Practice smooth navigation between sections</li>
+                <li>Prepare for potential questions during each section</li>
+                <li>Keep water nearby for clear narration</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>🚀 Ready to showcase the future of manufacturing management!</strong></p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Total Demo Duration: 5 minutes | Environment: http://localhost:5173/</p>
+    </div>
+</body>
+</html> 

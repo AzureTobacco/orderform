@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Tobacco Industrial FZCO - Business Deck</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
+    <style>
+        /* CSS Variables */
+        :root {
+            --cosmic-bg-primary: #0a0d1a;
+            --cosmic-bg-secondary: #161b2e;
+            --cosmic-star-white: #ffffff;
+            --cosmic-cyan: #00d4ff;
+            --cosmic-purple: #8b5cf6;
+            --cosmic-emerald: #10b981;
+            --cosmic-amber: #f59e0b;
+            --cosmic-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --cosmic-font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--cosmic-font-secondary);
+            background: var(--cosmic-bg-primary);
+            color: var(--cosmic-star-white);
+            overflow-x: hidden;
+        }
+
+        .cosmic-pitch-deck {
+            width: 100%;
+            height: 100vh;
+            background: var(--cosmic-bg-primary);
+            color: var(--cosmic-star-white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cosmic-pitch-deck.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: var(--cosmic-bg-primary);
+        }
+
+        .cosmic-pitch-deck-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .cosmic-pitch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 13, 26, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            z-index: 100;
+        }
+
+        .cosmic-pitch-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .cosmic-pitch-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--cosmic-star-white);
+            margin: 0;
+        }
+
+        .cosmic-pitch-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .cosmic-pitch-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: var(--cosmic-star-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-pitch-btn:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .cosmic-pitch-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .cosmic-loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-top: 2px solid var(--cosmic-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .cosmic-slide-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .cosmic-nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            color: var(--cosmic-star-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-nav-btn:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .cosmic-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .cosmic-slide-indicators {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cosmic-slide-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-slide-dot.active {
+            background: var(--cosmic-cyan);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transform: scale(1.2);
+        }
+
+        .cosmic-slide-dot:hover {
+            background: rgba(0, 212, 255, 0.6);
+            transform: scale(1.1);
+        }
+
+        .cosmic-slide-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .cosmic-slide-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            max-height: 700px;
+        }
+
+        .cosmic-slide {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 13, 26, 0.95), rgba(20, 25, 45, 0.95));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .cosmic-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(0, 212, 255, 0.05) 50%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cosmic-slide-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .cosmic-slide-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cosmic-star-white);
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, var(--cosmic-star-white), var(--cosmic-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cosmic-slide-accent {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cosmic-cyan), var(--cosmic-purple));
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        /* Title Slide Styles */
+        .cosmic-title-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .cosmic-title-content {
+            max-width: 900px;
+        }
+
+        .cosmic-company-logo {
+            position: relative;
+            margin: 0 auto 2rem;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cosmic-logo-icon {
+            color: var(--cosmic-cyan);
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5));
+        }
+
+        .cosmic-logo-glow {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .cosmic-main-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--cosmic-star-white);
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, var(--cosmic-star-white), var(--cosmic-cyan), var(--cosmic-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cosmic-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0 0 2rem 0;
+            font-weight: 300;
+        }
+
+        .cosmic-tagline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1.2rem;
+            color: var(--cosmic-cyan);
+            margin: 2rem 0;
+            font-weight: 500;
+        }
+
+        .cosmic-presentation-info {
+            margin-top: 3rem;
+        }
+
+        .cosmic-date-location {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        .cosmic-slide-counter {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Content Grid Styles */
+        .cosmic-content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .cosmic-card {
+            background: rgba(31, 38, 55, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-card:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+        }
+
+        .cosmic-card-icon {
+            color: var(--cosmic-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .cosmic-card h3 {
+            font-size: 1.25rem;
+            color: var(--cosmic-star-white);
+            margin-bottom: 0.75rem;
+        }
+
+        .cosmic-card p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .cosmic-card ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+
+        .cosmic-card ul li {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .cosmic-card ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--cosmic-emerald);
+            font-weight: bold;
+        }
+
+        .cosmic-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .cosmic-stat-card {
+            background: rgba(31, 38, 55, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .cosmic-stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cosmic-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .cosmic-stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .cosmic-two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .cosmic-benefit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .cosmic-benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(31, 38, 55, 0.4);
+            border-radius: 8px;
+            border-left: 3px solid var(--cosmic-cyan);
+        }
+
+        .cosmic-benefit-item svg {
+            color: var(--cosmic-emerald);
+            flex-shrink: 0;
+        }
+
+        .cosmic-benefit-item span {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .cosmic-cta-section {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(31, 38, 55, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .cosmic-cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .cosmic-cta-btn {
+            padding: 0.75rem 2rem;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            border-radius: 8px;
+            color: var(--cosmic-star-white);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-cta-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .cosmic-cta-btn.primary {
+            background: linear-gradient(135deg, var(--cosmic-cyan), var(--cosmic-purple));
+            border: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cosmic-slide-header h2 {
+                font-size: 2rem;
+            }
+            
+            .cosmic-main-title {
+                font-size: 2.5rem;
+            }
+            
+            .cosmic-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .cosmic-two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .cosmic-content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cosmic-slide {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+        const { motion, AnimatePresence } = Motion;
+
+        // Business Deck Component
+        const BusinessDeck = () => {
+            const [currentSlide, setCurrentSlide] = useState(0);
+            const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+            const slideContentRef = useRef(null);
+
+            const slides = [
+                { id: 0, title: "Title Slide" },
+                { id: 1, title: "Company Overview" },
+                { id: 2, title: "Our Services" },
+                { id: 3, title: "White Label Manufacturing" },
+                { id: 4, title: "Product Portfolio" },
+                { id: 5, title: "Quality & Compliance" },
+                { id: 6, title: "Distribution Partnership" },
+                { id: 7, title: "Why Choose Us" },
+                { id: 8, title: "Contact & Next Steps" }
+            ];
+
+            const nextSlide = () => {
+                setCurrentSlide((prev) => (prev + 1) % slides.length);
+            };
+
+            const prevSlide = () => {
+                setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+            };
+
+            const goToSlide = (index) => {
+                setCurrentSlide(index);
+            };
+
+            const handleDownloadPDF = async () => {
+                setIsGeneratingPDF(true);
+                try {
+                    if (!slideContentRef.current) return;
+                    
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('landscape', 'mm', 'a4');
+                    
+                    // This is a simplified PDF generation
+                    // For full implementation, you'd capture each slide
+                    pdf.setFillColor(10, 13, 26);
+                    pdf.rect(0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight(), 'F');
+                    
+                    pdf.setTextColor(0, 212, 255);
+                    pdf.setFontSize(24);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text('Azure Tobacco Industrial FZCO', 105, 80, { align: 'center' });
+                    
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFontSize(16);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text('Business Deck - Distributors & White Label Partners', 105, 100, { align: 'center' });
+                    
+                    pdf.save('Azure_Tobacco_Business_Deck.pdf');
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Error generating PDF. Please try again.');
+                } finally {
+                    setIsGeneratingPDF(false);
+                }
+            };
+
+            const renderSlide = () => {
+                switch(currentSlide) {
+                    case 0: return <TitleSlide />;
+                    case 1: return <CompanyOverviewSlide />;
+                    case 2: return <OurServicesSlide />;
+                    case 3: return <WhiteLabelSlide />;
+                    case 4: return <ProductPortfolioSlide />;
+                    case 5: return <QualityComplianceSlide />;
+                    case 6: return <DistributionPartnershipSlide />;
+                    case 7: return <WhyChooseUsSlide />;
+                    case 8: return <ContactSlide />;
+                    default: return <TitleSlide />;
+                }
+            };
+
+            return (
+                <div className="cosmic-pitch-deck">
+                    <div className="cosmic-pitch-deck-container">
+                        {/* Header Controls */}
+                        <div className="cosmic-pitch-header">
+                            <div className="cosmic-pitch-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14,2 14,8 20,8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10,9 9,9 8,9"></polyline>
+                                </svg>
+                                <h2>Azure Tobacco Industrial FZCO - Business Deck</h2>
+                            </div>
+                            <div className="cosmic-pitch-controls">
+                                <button 
+                                    className="cosmic-pitch-btn" 
+                                    onClick={handleDownloadPDF}
+                                    disabled={isGeneratingPDF}
+                                    title="Download as PDF"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7,10 12,15 17,10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    {isGeneratingPDF && <div className="cosmic-loading-spinner"></div>}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Slide Navigation */}
+                        <div className="cosmic-slide-nav">
+                            <button 
+                                className="cosmic-nav-btn" 
+                                onClick={prevSlide}
+                                disabled={currentSlide === 0}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="15,18 9,12 15,6"></polyline>
+                                </svg>
+                            </button>
+                            
+                            <div className="cosmic-slide-indicators">
+                                {slides.map((slide, index) => (
+                                    <button
+                                        key={slide.id}
+                                        className={`cosmic-slide-dot ${currentSlide === index ? 'active' : ''}`}
+                                        onClick={() => goToSlide(index)}
+                                        title={slide.title}
+                                    />
+                                ))}
+                            </div>
+                            
+                            <button 
+                                className="cosmic-nav-btn" 
+                                onClick={nextSlide}
+                                disabled={currentSlide === slides.length - 1}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9,18 15,12 9,6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Main Slide Content */}
+                        <div className="cosmic-slide-content" ref={slideContentRef}>
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentSlide}
+                                    initial={{ opacity: 0, x: 100 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -100 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="cosmic-slide-wrapper"
+                                >
+                                    {renderSlide()}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Slide Counter */}
+                        <div className="cosmic-slide-counter">
+                            {currentSlide + 1} / {slides.length}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Title Slide
+        const TitleSlide = () => (
+            <div className="cosmic-slide cosmic-title-slide">
+                <div className="cosmic-title-content">
+                    <div className="cosmic-company-logo">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-logo-icon">
+                            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+                            <path d="M6 12H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M10 6h4"></path>
+                            <path d="M10 10h4"></path>
+                            <path d="M10 14h4"></path>
+                            <path d="M10 18h4"></path>
+                        </svg>
+                        <div className="cosmic-logo-glow"></div>
+                    </div>
+                    
+                    <h1 className="cosmic-main-title">
+                        Azure Tobacco Industrial FZCO
+                    </h1>
+                    
+                    <p className="cosmic-subtitle">
+                        Premium Tobacco Manufacturing & Distribution Excellence
+                    </p>
+                    
+                    <div className="cosmic-tagline">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                            <path d="M2 21c0-3 1.85-5.36 5.08-6"></path>
+                        </svg>
+                        <span>Crafting Quality • Driving Innovation • Delivering Excellence</span>
+                    </div>
+                    
+                    <div className="cosmic-presentation-info">
+                        <div className="cosmic-date-location">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            <span>Dubai, UAE • {new Date().getFullYear()}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Company Overview Slide
+        const CompanyOverviewSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Company Overview</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div className="cosmic-stat-grid">
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">2018</div>
+                        <div className="cosmic-stat-label">Established</div>
+                    </div>
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">150+</div>
+                        <div className="cosmic-stat-label">Employees</div>
+                    </div>
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">Global</div>
+                        <div className="cosmic-stat-label">Markets</div>
+                    </div>
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">Dubai</div>
+                        <div className="cosmic-stat-label">Location</div>
+                    </div>
+                </div>
+
+                <div className="cosmic-two-column">
+                    <div>
+                        <h3 style={{ color: '#00d4ff', marginBottom: '1rem', fontSize: '1.5rem' }}>Our Mission</h3>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.8' }}>
+                            To deliver premium tobacco products that exceed customer expectations through innovative manufacturing processes, sustainable practices, and unwavering commitment to quality.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 style={{ color: '#00d4ff', marginBottom: '1rem', fontSize: '1.5rem' }}>Our Vision</h3>
+                        <p style={{ color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.8' }}>
+                            To become the leading tobacco manufacturing company in the Middle East and Africa, recognized for excellence in product quality, operational efficiency, and customer satisfaction.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Our Services Slide
+        const OurServicesSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Our Services</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div className="cosmic-content-grid">
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <h3>Manufacturing</h3>
+                        <p>State-of-the-art tobacco processing and manufacturing facilities with advanced automation and quality control systems.</p>
+                        <ul>
+                            <li>Premium tobacco processing</li>
+                            <li>Custom blending services</li>
+                            <li>Automated production lines</li>
+                            <li>Quality assurance systems</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        <h3>White Label Manufacturing</h3>
+                        <p>Complete white label solutions for brands looking to launch or expand their product lines without manufacturing infrastructure.</p>
+                        <ul>
+                            <li>Custom product development</li>
+                            <li>Private label packaging</li>
+                            <li>Brand customization</li>
+                            <li>Full manufacturing support</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <h3>Distribution</h3>
+                        <p>Comprehensive distribution network serving global markets with efficient logistics and supply chain management.</p>
+                        <ul>
+                            <li>Global logistics network</li>
+                            <li>Supply chain optimization</li>
+                            <li>Inventory management</li>
+                            <li>Partnership programs</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <h3>Quality & Compliance</h3>
+                        <p>Rigorous quality control and regulatory compliance ensuring products meet international standards.</p>
+                        <ul>
+                            <li>ISO 9001 certified</li>
+                            <li>HACCP compliance</li>
+                            <li>Regulatory expertise</li>
+                            <li>Quality certifications</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // White Label Manufacturing Slide
+        const WhiteLabelSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>White Label Manufacturing</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{ color: '#00d4ff', fontSize: '1.5rem', marginBottom: '1rem' }}>
+                        Complete Manufacturing Solutions for Your Brand
+                    </h3>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '900px', margin: '0 auto' }}>
+                        Partner with us to bring your tobacco products to market. We handle everything from product development to final packaging, allowing you to focus on building your brand.
+                    </p>
+                </div>
+
+                <div className="cosmic-content-grid">
+                    <div className="cosmic-card">
+                        <h3>Product Development</h3>
+                        <ul>
+                            <li>Custom blend formulation</li>
+                            <li>Flavor profile development</li>
+                            <li>Product testing & refinement</li>
+                            <li>Prototype development</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Manufacturing</h3>
+                        <ul>
+                            <li>Full production capabilities</li>
+                            <li>Scalable manufacturing</li>
+                            <li>Quality control at every stage</li>
+                            <li>Flexible order quantities</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Packaging & Branding</h3>
+                        <ul>
+                            <li>Custom packaging design</li>
+                            <li>Private label printing</li>
+                            <li>Brand compliance</li>
+                            <li>Regulatory labeling</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Support Services</h3>
+                        <ul>
+                            <li>Regulatory compliance</li>
+                            <li>Quality certifications</li>
+                            <li>Logistics & shipping</li>
+                            <li>Ongoing partnership support</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="cosmic-benefit-list">
+                    <div className="cosmic-benefit-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>No minimum order quantities for established partnerships</span>
+                    </div>
+                    <div className="cosmic-benefit-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Complete confidentiality and brand protection</span>
+                    </div>
+                    <div className="cosmic-benefit-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Competitive pricing with transparent cost structure</span>
+                    </div>
+                    <div className="cosmic-benefit-item">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Fast turnaround times and reliable delivery</span>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Product Portfolio Slide
+        const ProductPortfolioSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Product Portfolio</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div className="cosmic-content-grid">
+                    <div className="cosmic-card">
+                        <h3>Cigarettes</h3>
+                        <p>Premium cigarette manufacturing with various formats and strengths.</p>
+                        <ul>
+                            <li>Full flavor, light, ultra-light</li>
+                            <li>King size, 100s, 120s</li>
+                            <li>Menthol and non-menthol</li>
+                            <li>Custom blends available</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Rolling Tobacco</h3>
+                        <p>High-quality rolling tobacco in various cuts and flavors.</p>
+                        <ul>
+                            <li>Fine cut, medium cut</li>
+                            <li>Natural and flavored</li>
+                            <li>Premium blends</li>
+                            <li>Custom packaging</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Pipe Tobacco</h3>
+                        <p>Specialty pipe tobacco blends for discerning customers.</p>
+                        <ul>
+                            <li>Traditional blends</li>
+                            <li>Aromatic varieties</li>
+                            <li>Premium quality</li>
+                            <li>Custom formulations</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Custom Products</h3>
+                        <p>Tailored products developed to meet specific market needs.</p>
+                        <ul>
+                            <li>Product development</li>
+                            <li>Custom formulations</li>
+                            <li>Market-specific products</li>
+                            <li>Innovation partnerships</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(31, 38, 55, 0.4)', borderRadius: '12px', border: '1px solid rgba(0, 212, 255, 0.2)' }}>
+                    <h3 style={{ color: '#00d4ff', marginBottom: '1rem' }}>Product Development Capabilities</h3>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.8' }}>
+                        Our R&D team works closely with partners to develop products that meet specific market requirements, 
+                        regulatory standards, and consumer preferences. We offer complete support from concept to commercialization.
+                    </p>
+                </div>
+            </div>
+        );
+
+        // Quality & Compliance Slide
+        const QualityComplianceSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Quality & Compliance</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div className="cosmic-stat-grid">
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">99.5%</div>
+                        <div className="cosmic-stat-label">Quality Pass Rate</div>
+                    </div>
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">ISO 9001</div>
+                        <div className="cosmic-stat-label">Certified</div>
+                    </div>
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">HACCP</div>
+                        <div className="cosmic-stat-label">Compliant</div>
+                    </div>
+                    <div className="cosmic-stat-card">
+                        <div className="cosmic-stat-number">24/7</div>
+                        <div className="cosmic-stat-label">Quality Monitoring</div>
+                    </div>
+                </div>
+
+                <div className="cosmic-two-column">
+                    <div>
+                        <h3 style={{ color: '#00d4ff', marginBottom: '1rem', fontSize: '1.5rem' }}>Quality Assurance</h3>
+                        <div className="cosmic-benefit-list">
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Multi-stage quality control processes</span>
+                            </div>
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Real-time quality monitoring systems</span>
+                            </div>
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Premium raw material sourcing</span>
+                            </div>
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Comprehensive testing protocols</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style={{ color: '#00d4ff', marginBottom: '1rem', fontSize: '1.5rem' }}>Regulatory Compliance</h3>
+                        <div className="cosmic-benefit-list">
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>International regulatory expertise</span>
+                            </div>
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Multi-market compliance support</span>
+                            </div>
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Documentation and certification</span>
+                            </div>
+                            <div className="cosmic-benefit-item">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Ongoing compliance monitoring</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Distribution Partnership Slide
+        const DistributionPartnershipSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Distribution Partnership</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{ color: '#00d4ff', fontSize: '1.5rem', marginBottom: '1rem' }}>
+                        Partner with Us for Market Success
+                    </h3>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '900px', margin: '0 auto' }}>
+                        We offer comprehensive distribution partnership programs designed to help distributors succeed in their markets with competitive pricing, reliable supply, and dedicated support.
+                    </p>
+                </div>
+
+                <div className="cosmic-content-grid">
+                    <div className="cosmic-card">
+                        <h3>Partnership Benefits</h3>
+                        <ul>
+                            <li>Competitive wholesale pricing</li>
+                            <li>Exclusive territory opportunities</li>
+                            <li>Marketing support materials</li>
+                            <li>Flexible payment terms</li>
+                            <li>Priority order processing</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Support Services</h3>
+                        <ul>
+                            <li>Dedicated account management</li>
+                            <li>Product training programs</li>
+                            <li>Marketing collateral</li>
+                            <li>Technical support</li>
+                            <li>Regular business reviews</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Logistics & Supply</h3>
+                        <ul>
+                            <li>Reliable delivery schedules</li>
+                            <li>Global shipping capabilities</li>
+                            <li>Inventory management support</li>
+                            <li>Order tracking systems</li>
+                            <li>Supply chain optimization</li>
+                        </ul>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <h3>Market Development</h3>
+                        <ul>
+                            <li>Market intelligence sharing</li>
+                            <li>Joint marketing initiatives</li>
+                            <li>Product launch support</li>
+                            <li>Sales training programs</li>
+                            <li>Growth partnership programs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Why Choose Us Slide
+        const WhyChooseUsSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Why Choose Us</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div className="cosmic-content-grid">
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <h3>Premium Quality</h3>
+                        <p>Rigorous quality control and premium raw materials ensure consistent, superior products that meet the highest standards.</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <h3>Innovation</h3>
+                        <p>Cutting-edge technology and continuous innovation in manufacturing processes and product development.</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <h3>Strategic Location</h3>
+                        <p>Dubai's strategic position provides excellent access to global markets with world-class logistics infrastructure.</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <h3>Partnership Focus</h3>
+                        <p>We build long-term partnerships based on trust, transparency, and mutual success with dedicated support.</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <h3>Compliance & Safety</h3>
+                        <p>Full regulatory compliance with international standards and certifications for quality and safety.</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <h3>Reliability</h3>
+                        <p>Consistent on-time delivery, reliable supply chain, and responsive customer service you can count on.</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Contact Slide
+        const ContactSlide = () => (
+            <div className="cosmic-slide">
+                <div className="cosmic-slide-header">
+                    <h2>Contact & Next Steps</h2>
+                    <div className="cosmic-slide-accent"></div>
+                </div>
+                
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{ color: '#00d4ff', fontSize: '1.5rem', marginBottom: '1rem' }}>
+                        Let's Build a Successful Partnership
+                    </h3>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '1.1rem', maxWidth: '900px', margin: '0 auto' }}>
+                        Whether you're a distributor looking for quality products or a brand seeking white label manufacturing, we're here to help you succeed.
+                    </p>
+                </div>
+
+                <div className="cosmic-content-grid">
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <h3>Location</h3>
+                        <p>Azure Tobacco Industrial FZCO<br />
+                        Dubai, United Arab Emirates<br />
+                        Business Bay, Dubai International Financial Centre</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <h3>Contact</h3>
+                        <p>Email: info@azuretobacco.com<br />
+                        Phone: +971 4 XXX XXXX<br />
+                        Website: www.azuretobacco.com</p>
+                    </div>
+
+                    <div className="cosmic-card">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-card-icon">
+                            <path d="M8 2v4"></path>
+                            <path d="M16 2v4"></path>
+                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                            <path d="M3 10h18"></path>
+                        </svg>
+                        <h3>Next Steps</h3>
+                        <ul>
+                            <li>Schedule a consultation</li>
+                            <li>Product portfolio review</li>
+                            <li>Partnership discussion</li>
+                            <li>Proposal & agreement</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="cosmic-cta-section">
+                    <h4 style={{ color: '#00d4ff', fontSize: '1.5rem', marginBottom: '1rem' }}>Ready to Get Started?</h4>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '1.5rem' }}>
+                        Contact us today to discuss how we can help grow your business
+                    </p>
+                    <div className="cosmic-cta-buttons">
+                        <button className="cosmic-cta-btn primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Contact Us
+                        </button>
+                        <button className="cosmic-cta-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M8 2v4"></path>
+                                <path d="M16 2v4"></path>
+                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                <path d="M3 10h18"></path>
+                            </svg>
+                            Schedule Meeting
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Render the component
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BusinessDeck />);
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,108 @@
+import React from "react"
+
+const CRMManagement: React.FC = () => {
+  return (
+    <div style={{ padding: "2rem" }}>
+      <h1 style={{ color: "#2c3e50", marginBottom: "2rem", fontSize: "2rem", fontWeight: "700" }}>
+        🤝 Customer Relationship Management
+      </h1>
+      
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+        gap: "2rem",
+        marginTop: "2rem"
+      }}>
+        <div style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "15px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ color: "#667eea", marginBottom: "1rem" }}>
+            👥 Active Customers
+          </h2>
+          <div style={{
+            fontSize: "2rem",
+            fontWeight: "bold",
+            color: "#2c3e50",
+            marginBottom: "0.5rem"
+          }}>
+            1,247
+          </div>
+          <div style={{ color: "#666" }}>
+            Total Customers
+          </div>
+        </div>
+
+        <div style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "15px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ color: "#4facfe", marginBottom: "1rem" }}>
+            📞 Support Tickets
+          </h2>
+          <div style={{
+            fontSize: "2rem",
+            fontWeight: "bold",
+            color: "#ff9800",
+            marginBottom: "0.5rem"
+          }}>
+            23
+          </div>
+          <div style={{ color: "#666" }}>
+            Open Tickets
+          </div>
+        </div>
+
+        <div style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "15px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ color: "#fa709a", marginBottom: "1rem" }}>
+            😊 Satisfaction
+          </h2>
+          <div style={{
+            fontSize: "2rem",
+            fontWeight: "bold",
+            color: "#4caf50",
+            marginBottom: "0.5rem"
+          }}>
+            94%
+          </div>
+          <div style={{ color: "#666" }}>
+            Customer Rating
+          </div>
+        </div>
+
+        <div style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "15px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+        }}>
+          <h2 style={{ color: "#a8edea", marginBottom: "1rem" }}>
+            🔄 Retention Rate
+          </h2>
+          <div style={{
+            fontSize: "2rem",
+            fontWeight: "bold",
+            color: "#4caf50",
+            marginBottom: "0.5rem"
+          }}>
+            87%
+          </div>
+          <div style={{ color: "#666" }}>
+            Customer Retention
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default CRMManagement

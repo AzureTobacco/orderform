@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Tobacco Industrial FZCO - Pitch Deck</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
+    <style>
+        /* CSS Variables */
+        :root {
+            --cosmic-bg-primary: #0a0d1a;
+            --cosmic-star-white: #ffffff;
+            --cosmic-cyan: #00d4ff;
+            --cosmic-purple: #8b5cf6;
+            --cosmic-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --cosmic-font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--cosmic-font-secondary);
+            background: var(--cosmic-bg-primary);
+            color: var(--cosmic-star-white);
+            overflow-x: hidden;
+        }
+
+        /* Include all the cosmic pitch deck styles */
+        .cosmic-pitch-deck {
+            width: 100%;
+            height: 100vh;
+            background: var(--cosmic-bg-primary);
+            color: var(--cosmic-star-white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cosmic-pitch-deck.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: var(--cosmic-bg-primary);
+        }
+
+        .cosmic-pitch-deck-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .cosmic-pitch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 13, 26, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            z-index: 100;
+        }
+
+        .cosmic-pitch-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .cosmic-pitch-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--cosmic-star-white);
+            margin: 0;
+        }
+
+        .cosmic-pitch-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .cosmic-pitch-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: var(--cosmic-star-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-pitch-btn:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .cosmic-pitch-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .cosmic-loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-top: 2px solid var(--cosmic-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .cosmic-slide-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .cosmic-nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            color: var(--cosmic-star-white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-nav-btn:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .cosmic-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .cosmic-slide-indicators {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .cosmic-slide-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cosmic-slide-dot.active {
+            background: var(--cosmic-cyan);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transform: scale(1.2);
+        }
+
+        .cosmic-slide-dot:hover {
+            background: rgba(0, 212, 255, 0.6);
+            transform: scale(1.1);
+        }
+
+        .cosmic-slide-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .cosmic-slide-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 600px;
+        }
+
+        .cosmic-slide {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 13, 26, 0.95), rgba(20, 25, 45, 0.95));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cosmic-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(0, 212, 255, 0.05) 50%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cosmic-slide-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .cosmic-slide-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cosmic-star-white);
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, var(--cosmic-star-white), var(--cosmic-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cosmic-slide-accent {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cosmic-cyan), var(--cosmic-purple));
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
+        /* Title Slide Styles */
+        .cosmic-title-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .cosmic-title-content {
+            max-width: 800px;
+        }
+
+        .cosmic-company-logo {
+            position: relative;
+            margin: 0 auto 2rem;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cosmic-logo-icon {
+            color: var(--cosmic-cyan);
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.5));
+        }
+
+        .cosmic-logo-glow {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .cosmic-main-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--cosmic-star-white);
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, var(--cosmic-star-white), var(--cosmic-cyan), var(--cosmic-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cosmic-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0 0 2rem 0;
+            font-weight: 300;
+        }
+
+        .cosmic-tagline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 1.2rem;
+            color: var(--cosmic-cyan);
+            margin: 2rem 0;
+            font-weight: 500;
+        }
+
+        .cosmic-presentation-info {
+            margin-top: 3rem;
+        }
+
+        .cosmic-date-location {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        .cosmic-slide-counter {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cosmic-slide-header h2 {
+                font-size: 2rem;
+            }
+            
+            .cosmic-main-title {
+                font-size: 2.5rem;
+            }
+            
+            .cosmic-subtitle {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+        const { motion, AnimatePresence } = Motion;
+
+        // PDF Generator Class
+        class PitchDeckPDFGenerator {
+            constructor() {
+                this.slides = this.initializeSlides();
+            }
+
+            initializeSlides() {
+                return [
+                    {
+                        title: "Azure Tobacco Industrial FZCO",
+                        content: "Premium Tobacco Manufacturing & Distribution Excellence\n\nCrafting Quality • Driving Innovation • Delivering Excellence\n\nDubai, UAE • 2024",
+                        type: "title"
+                    },
+                    {
+                        title: "Company Overview",
+                        content: `ESTABLISHED: 2018
+LOCATION: Dubai, UAE
+EMPLOYEES: 150+
+MARKETS: Global
+
+OUR MISSION
+To deliver premium tobacco products that exceed customer expectations through innovative manufacturing processes, sustainable practices, and unwavering commitment to quality.
+
+OUR VISION
+To become the leading tobacco manufacturing company in the Middle East and Africa, recognized for excellence in product quality, operational efficiency, and customer satisfaction.
+
+KEY VALUES
+• Quality Excellence
+• Innovation Leadership
+• Sustainable Operations
+• Customer Focus`,
+                        type: "overview"
+                    }
+                    // Add more slides as needed
+                ];
+            }
+
+            async generatePDF() {
+                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                
+                // Add title page
+                this.addTitlePage(pdf, pageWidth, pageHeight);
+                
+                // Add content pages
+                for (let i = 0; i < this.slides.length; i++) {
+                    if (i > 0) {
+                        pdf.addPage();
+                    }
+                    this.addContentPage(pdf, this.slides[i], pageWidth, pageHeight);
+                }
+                
+                // Save the PDF
+                pdf.save('Azure_Tobacco_Industrial_FZCO_Pitch_Deck.pdf');
+            }
+
+            addTitlePage(pdf, pageWidth, pageHeight) {
+                // Background
+                pdf.setFillColor(10, 13, 26);
+                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                
+                // Logo placeholder
+                pdf.setFillColor(0, 212, 255);
+                pdf.circle(pageWidth / 2, pageHeight / 2 - 40, 30, 'F');
+                
+                // Company name
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(28);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Azure Tobacco Industrial FZCO', pageWidth / 2, pageHeight / 2 + 10, { align: 'center' });
+                
+                // Subtitle
+                pdf.setTextColor(200, 200, 200);
+                pdf.setFontSize(16);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Premium Tobacco Manufacturing & Distribution Excellence', pageWidth / 2, pageHeight / 2 + 30, { align: 'center' });
+                
+                // Tagline
+                pdf.setTextColor(0, 212, 255);
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('Crafting Quality • Driving Innovation • Delivering Excellence', pageWidth / 2, pageHeight / 2 + 50, { align: 'center' });
+                
+                // Date and location
+                pdf.setTextColor(150, 150, 150);
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Dubai, UAE • 2024', pageWidth / 2, pageHeight / 2 + 70, { align: 'center' });
+            }
+
+            addContentPage(pdf, slide, pageWidth, pageHeight) {
+                // Background
+                pdf.setFillColor(20, 25, 45);
+                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                
+                // Header background
+                pdf.setFillColor(10, 13, 26);
+                pdf.rect(0, 0, pageWidth, 40, 'F');
+                
+                // Title
+                pdf.setTextColor(0, 212, 255);
+                pdf.setFontSize(24);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text(slide.title, 20, 25);
+                
+                // Accent line
+                pdf.setDrawColor(0, 212, 255);
+                pdf.setLineWidth(2);
+                pdf.line(20, 30, 100, 30);
+                
+                // Content
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                
+                const lines = slide.content.split('\n');
+                let yPosition = 60;
+                const lineHeight = 7;
+                const maxWidth = pageWidth - 40;
+                
+                for (const line of lines) {
+                    if (line.trim() === '') {
+                        yPosition += lineHeight / 2;
+                        continue;
+                    }
+                    
+                    // Check if line starts with uppercase and ends with colon (section headers)
+                    if (line.match(/^[A-Z][A-Z\s]+:$/)) {
+                        pdf.setTextColor(0, 212, 255);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setFontSize(14);
+                        pdf.text(line, 20, yPosition);
+                        yPosition += lineHeight + 2;
+                        pdf.setTextColor(255, 255, 255);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setFontSize(12);
+                        continue;
+                    }
+                    
+                    // Check if line starts with bullet point
+                    if (line.trim().startsWith('•')) {
+                        pdf.text('•', 25, yPosition);
+                        const text = line.trim().substring(1).trim();
+                        pdf.text(text, 35, yPosition, { maxWidth: maxWidth - 35 });
+                    } else {
+                        // Regular text
+                        const wrappedText = pdf.splitTextToSize(line, maxWidth);
+                        for (const textLine of wrappedText) {
+                            pdf.text(textLine, 20, yPosition);
+                            yPosition += lineHeight;
+                        }
+                    }
+                    
+                    yPosition += 2;
+                    
+                    // Check if we need a new page
+                    if (yPosition > pageHeight - 30) {
+                        pdf.addPage();
+                        pdf.setFillColor(20, 25, 45);
+                        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                        yPosition = 30;
+                    }
+                }
+                
+                // Footer
+                pdf.setTextColor(100, 100, 100);
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Azure Tobacco Industrial FZCO', pageWidth - 100, pageHeight - 10);
+            }
+        }
+
+        // Simple Pitch Deck Component
+        const SimplePitchDeck = () => {
+            const [currentSlide, setCurrentSlide] = useState(0);
+            const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+            const slideContentRef = useRef(null);
+            const pdfGenerator = useRef(new PitchDeckPDFGenerator());
+
+            const slides = [
+                { id: 0, title: "Title Slide" },
+                { id: 1, title: "Company Overview" },
+                { id: 2, title: "Market Opportunity" },
+                { id: 3, title: "Our Solution" },
+                { id: 4, title: "Technology & Innovation" },
+                { id: 5, title: "Operational Excellence" },
+                { id: 6, title: "Financial Performance" },
+                { id: 7, title: "Competitive Advantage" },
+                { id: 8, title: "Growth Strategy" },
+                { id: 9, title: "Investment Opportunity" },
+                { id: 10, title: "Contact & Next Steps" }
+            ];
+
+            const nextSlide = () => {
+                setCurrentSlide((prev) => (prev + 1) % slides.length);
+            };
+
+            const prevSlide = () => {
+                setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+            };
+
+            const goToSlide = (index) => {
+                setCurrentSlide(index);
+            };
+
+            const handleDownloadPDF = async () => {
+                setIsGeneratingPDF(true);
+                try {
+                    await pdfGenerator.current.generatePDF();
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Error generating PDF. Please try again.');
+                } finally {
+                    setIsGeneratingPDF(false);
+                }
+            };
+
+            return (
+                <div className="cosmic-pitch-deck">
+                    <div className="cosmic-pitch-deck-container">
+                        {/* Header Controls */}
+                        <div className="cosmic-pitch-header">
+                            <div className="cosmic-pitch-title">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14,2 14,8 20,8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10,9 9,9 8,9"></polyline>
+                                </svg>
+                                <h2>Azure Tobacco Industrial FZCO - Pitch Deck</h2>
+                            </div>
+                            <div className="cosmic-pitch-controls">
+                                <button 
+                                    className="cosmic-pitch-btn" 
+                                    onClick={handleDownloadPDF}
+                                    disabled={isGeneratingPDF}
+                                    title="Download as PDF"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7,10 12,15 17,10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    {isGeneratingPDF && <div className="cosmic-loading-spinner"></div>}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Slide Navigation */}
+                        <div className="cosmic-slide-nav">
+                            <button 
+                                className="cosmic-nav-btn" 
+                                onClick={prevSlide}
+                                disabled={currentSlide === 0}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="15,18 9,12 15,6"></polyline>
+                                </svg>
+                            </button>
+                            
+                            <div className="cosmic-slide-indicators">
+                                {slides.map((slide, index) => (
+                                    <button
+                                        key={slide.id}
+                                        className={`cosmic-slide-dot ${currentSlide === index ? 'active' : ''}`}
+                                        onClick={() => goToSlide(index)}
+                                        title={slide.title}
+                                    />
+                                ))}
+                            </div>
+                            
+                            <button 
+                                className="cosmic-nav-btn" 
+                                onClick={nextSlide}
+                                disabled={currentSlide === slides.length - 1}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="9,18 15,12 9,6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Main Slide Content */}
+                        <div className="cosmic-slide-content" ref={slideContentRef}>
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentSlide}
+                                    initial={{ opacity: 0, x: 100 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -100 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="cosmic-slide-wrapper"
+                                >
+                                    {currentSlide === 0 ? (
+                                        <div className="cosmic-slide cosmic-title-slide">
+                                            <div className="cosmic-slide-content-wrapper">
+                                                <div className="cosmic-title-content">
+                                                    <div className="cosmic-company-logo">
+                                                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cosmic-logo-icon">
+                                                            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+                                                            <path d="M6 12H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                                                            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+                                                            <path d="M10 6h4"></path>
+                                                            <path d="M10 10h4"></path>
+                                                            <path d="M10 14h4"></path>
+                                                            <path d="M10 18h4"></path>
+                                                        </svg>
+                                                        <div className="cosmic-logo-glow"></div>
+                                                    </div>
+                                                    
+                                                    <h1 className="cosmic-main-title">
+                                                        Azure Tobacco Industrial FZCO
+                                                    </h1>
+                                                    
+                                                    <p className="cosmic-subtitle">
+                                                        Premium Tobacco Manufacturing & Distribution Excellence
+                                                    </p>
+                                                    
+                                                    <div className="cosmic-tagline">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                                                            <path d="M2 21c0-3 1.85-5.36 5.08-6"></path>
+                                                        </svg>
+                                                        <span>Crafting Quality • Driving Innovation • Delivering Excellence</span>
+                                                    </div>
+                                                    
+                                                    <div className="cosmic-presentation-info">
+                                                        <div className="cosmic-date-location">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                                <path d="M8 2v4"></path>
+                                                                <path d="M16 2v4"></path>
+                                                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                                                <path d="M3 10h18"></path>
+                                                            </svg>
+                                                            <span>Dubai, UAE • {new Date().getFullYear()}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="cosmic-slide">
+                                            <div className="cosmic-slide-header">
+                                                <h2>{slides[currentSlide].title}</h2>
+                                                <div className="cosmic-slide-accent"></div>
+                                            </div>
+                                            
+                                            <div style={{ padding: '2rem', textAlign: 'center' }}>
+                                                <h3 style={{ color: '#00d4ff', marginBottom: '1rem' }}>Slide Content</h3>
+                                                <p style={{ color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.6' }}>
+                                                    This is slide {currentSlide + 1} of {slides.length}. 
+                                                    The full content for each slide would be displayed here.
+                                                </p>
+                                                <p style={{ color: 'rgba(255, 255, 255, 0.6)', marginTop: '2rem', fontSize: '0.9rem' }}>
+                                                    Click the Download button above to generate a PDF version of this pitch deck.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Slide Counter */}
+                        <div className="cosmic-slide-counter">
+                            {currentSlide + 1} / {slides.length}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the component
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SimplePitchDeck />);
+    </script>
+</body>
+</html>
+
+

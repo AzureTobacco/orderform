@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern ERP System - Complete Showcase Guide</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1in;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            font-size: 12px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+            page-break-inside: avoid;
+        }
+        
+        .section h2 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #06b6d4;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section h3 {
+            color: #334155;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checklist {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #06b6d4;
+            margin: 1rem 0;
+        }
+        
+        .checklist ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .checklist li {
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checklist li::before {
+            content: "☐";
+            color: #06b6d4;
+            font-weight: bold;
+        }
+        
+        .scene-box {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            page-break-inside: avoid;
+        }
+        
+        .scene-title {
+            background: #1e293b;
+            color: white;
+            padding: 0.5rem 1rem;
+            margin: -1.5rem -1.5rem 1rem -1.5rem;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .narrator-text {
+            background: #06b6d4;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .actions-list {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            margin: 1rem 0;
+        }
+        
+        .actions-list h4 {
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+        
+        .actions-list ol {
+            margin-left: 1.5rem;
+        }
+        
+        .actions-list li {
+            margin: 0.25rem 0;
+        }
+        
+        .key-points {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        .key-points h4 {
+            color: #92400e;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .metric-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #06b6d4;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .feature-item {
+            background: #f8fafc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid #22c55e;
+        }
+        
+        .feature-item::before {
+            content: "✅";
+            margin-right: 0.5rem;
+        }
+        
+        .tips-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+        
+        .tips-box h4 {
+            color: #0369a1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .call-to-action {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .call-to-action h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #f8fafc;
+            border-top: 2px solid #06b6d4;
+            margin-top: 2rem;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        @media print {
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .scene-box {
+                page-break-inside: avoid;
+            }
+            
+            body {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Modern ERP System</h1>
+        <p>Complete Showcase Guide & Demonstration Script</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">Professional Manufacturing Management Solution</p>
+    </div>
+
+    <div class="section">
+        <h2>🎯 Overview</h2>
+        <p>This comprehensive guide provides a professional demonstration script for showcasing the Modern ERP System, specifically highlighting the Production Management module's advanced capabilities. Designed for presentations, video creation, and client demonstrations.</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 Pre-Demo Setup Checklist</h2>
+        
+        <h3>✅ Technical Requirements</h3>
+        <div class="checklist">
+            <ul>
+                <li>ERP System running at http://localhost:5173/</li>
+                <li>Browser opened (Chrome/Firefox recommended)</li>
+                <li>Screen resolution set to 1920x1080 for optimal display</li>
+                <li>Audio recording ready (if creating video)</li>
+                <li>Screen recording software configured</li>
+            </ul>
+        </div>
+
+        <h3>✅ Demo Environment</h3>
+        <div class="checklist">
+            <ul>
+                <li>All sample data loaded</li>
+                <li>Production Management module accessible</li>
+                <li>All tabs functional (Overview, Orders, Batches, Stations)</li>
+                <li>Modal dialogs working properly</li>
+                <li>Real-time data displaying correctly</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section">
+        <h2>🎬 Demonstration Script</h2>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 1: System Introduction (30 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "Welcome to the Modern ERP System - a cutting-edge enterprise resource planning solution designed for manufacturing excellence."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Open browser to http://localhost:5173/</li>
+                    <li>Show the cosmic-themed dashboard with animated background</li>
+                    <li>Highlight the modern UI with sidebar navigation</li>
+                    <li>Point out the real-time clock and temperature widget</li>
+                </ol>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Modern, responsive design with real-time data"</li>
+                    <li>"Intuitive navigation with categorized modules"</li>
+                    <li>"Enterprise-grade user interface"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 2: Production Management Access (20 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "Let's dive into our Production Management module - the heart of manufacturing operations."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Click on "Production Management" in the sidebar</li>
+                    <li>Show the smooth transition to the production dashboard</li>
+                    <li>Highlight the 4 main navigation tabs</li>
+                </ol>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Comprehensive production oversight"</li>
+                    <li>"Four key areas: Overview, Orders, Batches, and Stations"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 3: Overview Dashboard (60 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "The Overview dashboard provides real-time insights into production performance."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Show the overview tab (should be default)</li>
+                    <li>Highlight each metric card</li>
+                    <li>Scroll to show Active Production Orders</li>
+                    <li>Point out the Work Station Status section</li>
+                </ol>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">94.2%</div>
+                    <div class="metric-label">Production Efficiency</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">99.1%</div>
+                    <div class="metric-label">Quality Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">96.8%</div>
+                    <div class="metric-label">On-Time Delivery</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">145</div>
+                    <div class="metric-label">Units per Day</div>
+                </div>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Real-time KPIs for instant decision making"</li>
+                    <li>"Visual progress tracking for active orders"</li>
+                    <li>"Equipment status monitoring at a glance"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 4: Production Orders Management (90 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "Our Production Orders system provides complete lifecycle management for manufacturing orders."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Click on "Production Orders" tab</li>
+                    <li>Show the 3 sample orders with different statuses</li>
+                    <li>Highlight detailed information (order numbers, priority badges)</li>
+                    <li>Show production stages with worker assignments</li>
+                    <li>Point out quality check status indicators</li>
+                    <li>Click "New Order" button to show the modal</li>
+                    <li>Demonstrate the comprehensive form fields</li>
+                    <li>Close modal and show edit functionality</li>
+                </ol>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Complete order tracking from start to finish"</li>
+                    <li>"Stage-by-stage progress monitoring"</li>
+                    <li>"Quality control integration"</li>
+                    <li>"Easy order creation and modification"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 5: Batch Management (60 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "Batch Management ensures precise control over production runs."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Click on "Batch Management" tab</li>
+                    <li>Show the search and filter functionality</li>
+                    <li>Demonstrate filtering by stage and priority</li>
+                    <li>Show the progress bars and stage visualization</li>
+                    <li>Click "New Batch" to show the creation modal</li>
+                    <li>Highlight the batch details and metadata</li>
+                </ol>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Advanced filtering and search capabilities"</li>
+                    <li>"Visual progress tracking"</li>
+                    <li>"Priority-based production scheduling"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 6: Work Stations Monitoring (75 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "Work Station Management provides comprehensive equipment oversight."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Click on "Work Stations" tab</li>
+                    <li>Show station cards with status indicators</li>
+                    <li>Point out utilization percentages with color-coded bars</li>
+                    <li>Highlight maintenance schedules and alerts</li>
+                    <li>Show current order assignments</li>
+                    <li>Point out the summary metrics at the bottom</li>
+                    <li>Click "Add Station" to demonstrate configuration</li>
+                </ol>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Real-time equipment monitoring"</li>
+                    <li>"Proactive maintenance scheduling"</li>
+                    <li>"Utilization optimization"</li>
+                    <li>"Maintenance alert system"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 7: Interactive Features Demo (45 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "The system offers rich interactivity for enhanced user experience."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Switch between tabs to show smooth transitions</li>
+                    <li>Demonstrate responsive design by resizing browser</li>
+                    <li>Show hover effects on buttons and cards</li>
+                    <li>Open and close various modals</li>
+                    <li>Show the real-time updates in the interface</li>
+                </ol>
+            </div>
+            
+            <div class="key-points">
+                <h4>Key Points to Mention:</h4>
+                <ul>
+                    <li>"Responsive design for all devices"</li>
+                    <li>"Smooth animations and transitions"</li>
+                    <li>"Intuitive user interactions"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="scene-box">
+            <div class="scene-title">🎬 Scene 8: System Benefits Summary (30 seconds)</div>
+            
+            <div class="narrator-text">
+                <strong>Narrator:</strong> "This Modern ERP System delivers comprehensive manufacturing management capabilities."
+            </div>
+            
+            <div class="actions-list">
+                <h4>Actions:</h4>
+                <ol>
+                    <li>Return to overview dashboard</li>
+                    <li>Show the complete system in action</li>
+                    <li>Highlight the integration between different modules</li>
+                </ol>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-item">Real-time production monitoring</div>
+                <div class="feature-item">Complete order lifecycle management</div>
+                <div class="feature-item">Quality control integration</div>
+                <div class="feature-item">Equipment optimization</div>
+                <div class="feature-item">Proactive maintenance</div>
+                <div class="feature-item">Modern, intuitive interface</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section">
+        <h2>🎥 Video Production Guidelines</h2>
+        
+        <div class="tips-box">
+            <h4>📹 Recording Settings</h4>
+            <ul>
+                <li><strong>Resolution:</strong> 1920x1080 (Full HD)</li>
+                <li><strong>Frame Rate:</strong> 30 FPS</li>
+                <li><strong>Audio:</strong> Clear narration with optional background music</li>
+                <li><strong>Duration:</strong> 5-7 minutes total</li>
+            </ul>
+        </div>
+        
+        <div class="tips-box">
+            <h4>🎨 Visual Enhancement</h4>
+            <ul>
+                <li>Use smooth mouse movements</li>
+                <li>Pause briefly on important elements</li>
+                <li>Highlight key features with cursor</li>
+                <li>Show transitions between sections</li>
+            </ul>
+        </div>
+        
+        <div class="tips-box">
+            <h4>🎙️ Narration Tips</h4>
+            <ul>
+                <li>Speak clearly and at moderate pace</li>
+                <li>Emphasize key benefits and features</li>
+                <li>Use technical terms appropriately</li>
+                <li>Maintain enthusiastic but professional tone</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📈 Demo Data Reference</h2>
+        
+        <h3>Production Orders:</h3>
+        <div class="checklist">
+            <ul>
+                <li><strong>PROD-2024-001</strong> - Premium Tobacco Blend A (High Priority, In Progress)</li>
+                <li><strong>PROD-2024-002</strong> - Classic Tobacco Mix (Medium Priority, Quality Check)</li>
+                <li><strong>PROD-2024-003</strong> - Oriental Premium (Urgent Priority, Planned)</li>
+            </ul>
+        </div>
+
+        <h3>Work Stations:</h3>
+        <div class="checklist">
+            <ul>
+                <li><strong>Blending Station 1</strong> - Busy (85% utilization)</li>
+                <li><strong>Curing Chamber A</strong> - Available (0% utilization)</li>
+                <li><strong>Packaging Line 1</strong> - Maintenance (0% utilization)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="call-to-action">
+        <h3>🎯 Call-to-Action</h3>
+        <p>"This Modern ERP System represents the future of manufacturing management - combining powerful functionality with intuitive design. Whether you're managing production orders, monitoring equipment, or ensuring quality control, this system provides the tools you need for operational excellence."</p>
+        <p style="margin-top: 1rem;"><strong>"Ready to transform your manufacturing operations? Experience the power of modern ERP technology today."</strong></p>
+    </div>
+
+    <div class="section">
+        <h2>📞 Contact & Next Steps</h2>
+        <div class="checklist">
+            <ul>
+                <li><strong>Demo Environment:</strong> http://localhost:5173/</li>
+                <li><strong>Documentation:</strong> Available in project repository</li>
+                <li><strong>Support:</strong> Technical team available for customization</li>
+                <li><strong>Implementation:</strong> Ready for production deployment</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>© 2024 Modern ERP System - Revolutionizing Manufacturing Management</strong> 🚀</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">Professional Enterprise Resource Planning Solution</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Tobacco - Login</title>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a0d1a 0%, #161b2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #root { width: 100%; max-width: 400px; padding: 2rem; }
+        input { font-family: inherit; }
+        input:focus { outline: 2px solid #00d4ff; outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        // API Configuration - Update this if your backend is on a different URL
+        const API_BASE_URL = (() => {
+            // Check if we're opening the file directly (file://)
+            if (window.location.protocol === 'file:') {
+                return 'http://localhost:3000/api';
+            }
+            // Check if we're on localhost
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:3000/api';
+            }
+            // Production - use relative path
+            return '/api';
+        })();
+        
+        console.log('API Base URL:', API_BASE_URL);
+
+        const LoginPage = () => {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [isRegister, setIsRegister] = useState(false);
+            const [distributorName, setDistributorName] = useState('');
+            const [email, setEmail] = useState('');
+            const [phone, setPhone] = useState('');
+            const [address, setAddress] = useState('');
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoading(true);
+
+                try {
+                    console.log('Attempting login to:', `${API_BASE_URL}/auth/login`);
+                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    console.log('Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Network error or server not responding' }));
+                        throw new Error(errorData.error || `Login failed (Status: ${response.status})`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Login successful:', data);
+
+                    // Save token and user info
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to order form
+                    window.location.href = 'order-form.html';
+                } catch (err) {
+                    console.error('Login error:', err);
+                    setError(err.message || 'Failed to connect to server. Make sure the backend is running on port 3000.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleRegister = async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoading(true);
+
+                if (!distributorName.trim()) {
+                    setError('Distributor name is required');
+                    setLoading(false);
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username,
+                            password,
+                            distributorName,
+                            email,
+                            phone,
+                            address
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Registration failed');
+                    }
+
+                    // Save token and user info
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to order form
+                    window.location.href = 'order-form.html';
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div style={{
+                    background: 'rgba(31, 38, 55, 0.6)',
+                    borderRadius: '16px',
+                    padding: '2rem',
+                    border: '1px solid rgba(0, 212, 255, 0.2)',
+                    width: '100%'
+                }}>
+                    <h1 style={{
+                        fontSize: '2rem',
+                        marginBottom: '0.5rem',
+                        color: '#00d4ff',
+                        textAlign: 'center'
+                    }}>
+                        Azure Tobacco
+                    </h1>
+                    <p style={{
+                        color: 'rgba(255,255,255,0.7)',
+                        textAlign: 'center',
+                        marginBottom: '2rem'
+                    }}>
+                        {isRegister ? 'Create Distributor Account' : 'Distributor Order System'}
+                    </p>
+
+                    {error && (
+                        <div style={{
+                            padding: '0.75rem',
+                            background: 'rgba(244, 67, 54, 0.2)',
+                            border: '1px solid rgba(244, 67, 54, 0.5)',
+                            borderRadius: '8px',
+                            color: '#f44336',
+                            marginBottom: '1rem'
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={isRegister ? handleRegister : handleLogin}>
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '0.5rem',
+                                color: 'rgba(255,255,255,0.8)'
+                            }}>
+                                Username *
+                            </label>
+                            <input
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    background: 'rgba(0, 0, 0, 0.3)',
+                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '0.5rem',
+                                color: 'rgba(255,255,255,0.8)'
+                            }}>
+                                Password *
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                minLength={isRegister ? 6 : undefined}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.75rem',
+                                    background: 'rgba(0, 0, 0, 0.3)',
+                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    fontSize: '1rem'
+                                }}
+                            />
+                        </div>
+
+                        {isRegister && (
+                            <>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        marginBottom: '0.5rem',
+                                        color: 'rgba(255,255,255,0.8)'
+                                    }}>
+                                        Distributor Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={distributorName}
+                                        onChange={(e) => setDistributorName(e.target.value)}
+                                        required
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        marginBottom: '0.5rem',
+                                        color: 'rgba(255,255,255,0.8)'
+                                    }}>
+                                        Email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        marginBottom: '0.5rem',
+                                        color: 'rgba(255,255,255,0.8)'
+                                    }}>
+                                        Phone
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                </div>
+
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{
+                                        display: 'block',
+                                        marginBottom: '0.5rem',
+                                        color: 'rgba(255,255,255,0.8)'
+                                    }}>
+                                        Address
+                                    </label>
+                                    <textarea
+                                        value={address}
+                                        onChange={(e) => setAddress(e.target.value)}
+                                        rows={3}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(0, 0, 0, 0.3)',
+                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '1rem',
+                                            resize: 'vertical'
+                                        }}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                background: loading 
+                                    ? 'rgba(0, 212, 255, 0.5)' 
+                                    : 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontSize: '1rem',
+                                fontWeight: '600',
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                marginBottom: '1rem'
+                            }}
+                        >
+                            {loading ? 'Please wait...' : (isRegister ? 'Register' : 'Login')}
+                        </button>
+                    </form>
+
+                    <div style={{ textAlign: 'center' }}>
+                        <button
+                            onClick={() => {
+                                setIsRegister(!isRegister);
+                                setError('');
+                            }}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#00d4ff',
+                                cursor: 'pointer',
+                                textDecoration: 'underline'
+                            }}
+                        >
+                            {isRegister ? 'Already have an account? Login' : 'Need an account? Register'}
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<LoginPage />, document.getElementById('root'));
+    </script>
+</body>
+</html>
+

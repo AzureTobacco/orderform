@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Frontend ERP Application
+  erp-frontend:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    networks:
+      - erp-network
+
+  # PostgreSQL Database (for future backend)
+  # Uncomment when you're ready to add backend
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: azure_erp
+  #     POSTGRES_USER: erp_user
+  #     POSTGRES_PASSWORD: your_secure_password_here
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+  #   networks:
+  #     - erp-network
+
+  # Backend API (to be added later)
+  # erp-backend:
+  #   build: ./backend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     DATABASE_URL: postgresql://erp_user:password@postgres:5432/azure_erp
+  #   depends_on:
+  #     - postgres
+  #   restart: unless-stopped
+  #   networks:
+  #     - erp-network
+
+networks:
+  erp-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:
+
+
+
+
+
+
+
