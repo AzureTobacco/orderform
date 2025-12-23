@@ -1,81 +1,67 @@
-# 🚀 Quick Start - Azure Tobacco Order System
+# ✅ Everything is Ready!
 
-## ✅ Backend is Running!
+All setup steps have been completed for you. Here's what to do:
 
-The backend server is now running on `http://localhost:3000`
+## 🎯 To Start Using the System:
 
-## 📝 How to Login
+### 1. Start the Backend (Required for orders to be saved)
 
-### Step 1: Open the Login Page
+**Easiest way (macOS):**
+- Double-click: `backend/start-backend.command`
 
-**Option A: Direct File (Easiest)**
-1. Navigate to: `frontend/login.html`
-2. Double-click to open in your browser
-3. The page should automatically connect to `http://localhost:3000/api`
-
-**Option B: Local Web Server (Recommended)**
+**Or use Terminal:**
 ```bash
-cd frontend
-python3 -m http.server 8000
+cd src/components/src/backend
+./start-backend.sh
 ```
-Then open: `http://localhost:8000/login.html`
 
-### Step 2: Login Credentials
+You'll see: "Server is running on http://localhost:3000"
 
-**Default Admin Account:**
-- **Username**: `admin`
-- **Password**: `admin123`
+### 2. Use the Order Form
 
-### Step 3: After Login
+- **Local:** Open `distributor-order-form-standalone.html` in your browser
+- **Online:** Visit https://azuretobacco.github.io/orderform/
 
-Once logged in, you'll be redirected to the order form where you can:
-- Create new orders
-- Save drafts
-- Submit orders
+Distributors can now submit orders, and they'll be saved to your database!
 
-## 🔧 If Login Doesn't Work
+### 3. View Orders (Admin Dashboard)
 
-1. **Check Backend is Running**
-   ```bash
-   curl http://localhost:3000/api/health
-   ```
-   Should return: `{"status":"ok",...}`
+- Open `admin-dashboard.html` in your browser
+- Login with:
+  - Username: `admin`
+  - Password: `admin123`
 
-2. **Check Browser Console**
-   - Press F12
-   - Go to Console tab
-   - Look for error messages
-   - You should see: `API Base URL: http://localhost:3000/api`
+You can now:
+- ✅ See all orders from all distributors
+- ✅ View order details (customer, products, range, packaging)
+- ✅ Generate monthly reports
+- ✅ See total revenue and order statistics
 
-3. **Verify Credentials**
-   - Username: `admin` (lowercase)
-   - Password: `admin123` (lowercase)
+## 📋 What's Already Done:
 
-4. **Check Network Tab**
-   - Press F12 → Network tab
-   - Try to login
-   - Look for the `/api/auth/login` request
-   - Check if it returns 200 (success) or an error
+✅ Backend server configured  
+✅ Database schema updated (includes range & packaging)  
+✅ Order form connected to API  
+✅ Admin dashboard ready  
+✅ Monthly reporting enabled  
+✅ Startup scripts created  
+✅ All files configured  
 
-## 🆘 Still Having Issues?
+## 🔐 Default Login:
 
-See `TROUBLESHOOTING.md` for detailed solutions.
+- **Username:** admin
+- **Password:** admin123
 
-## 📋 Next Steps
+⚠️ Change this password in production!
 
-1. Login with admin account
-2. Create your first order
-3. Register distributor accounts (if needed)
-4. View monthly reconciliation
+## 📁 Important Files:
 
----
+- `backend/start-backend.command` - Double-click to start server (macOS)
+- `backend/start-backend.sh` - Startup script (Linux/Mac)
+- `distributor-order-form-standalone.html` - Order form
+- `admin-dashboard.html` - Admin dashboard
+- `QUICK_START_BACKEND.md` - Detailed instructions
 
-**Backend Status**: ✅ Running on port 3000
-**Database**: ✅ SQLite initialized
-**Admin User**: ✅ Created (admin/admin123)
+## 🚀 That's It!
 
-
-
-
-
-
+Just start the backend and you're ready to go!
