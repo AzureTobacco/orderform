@@ -1,13 +1,890 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modern ERP System</title>
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Tobacco - Distributor Order Form</title>
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a0d1a 0%, #161b2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        #root { 
+            min-height: 100vh; 
+            padding: 2rem;
+        }
+        input, textarea, select {
+            font-family: inherit;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #00d4ff;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Order Storage Utilities
+        const STORAGE_KEY_ORDERS = 'azure_tobacco_distributor_orders';
+        const STORAGE_KEY_DISTRIBUTOR = 'azure_tobacco_distributor_info';
+
+        const generateOrderNumber = () => {
+            const prefix = 'AT';
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `${prefix}-${year}${month}${day}-${random}`;
+        };
+
+        const generateOrderId = () => {
+            return `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        };
+
+        const getAllOrders = () => {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_ORDERS);
+                if (!stored) return [];
+                return JSON.parse(stored);
+            } catch (error) {
+                console.error('Error reading orders:', error);
+                return [];
+            }
+        };
+
+        const saveOrder = (order) => {
+            try {
+                const orders = getAllOrders();
+                const existingIndex = orders.findIndex(o => o.id === order.id);
+                if (existingIndex >= 0) {
+                    orders[existingIndex] = { ...order, updatedAt: new Date().toISOString() };
+                } else {
+                    orders.push(order);
+                }
+                localStorage.setItem(STORAGE_KEY_ORDERS, JSON.stringify(orders));
+            } catch (error) {
+                console.error('Error saving order:', error);
+                throw error;
+            }
+        };
+
+        const getDistributorInfo = () => {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_DISTRIBUTOR);
+                if (!stored) return null;
+                return JSON.parse(stored);
+            } catch (error) {
+                console.error('Error reading distributor info:', error);
+                return null;
+            }
+        };
+
+        const saveDistributorInfo = (info) => {
+            try {
+                localStorage.setItem(STORAGE_KEY_DISTRIBUTOR, JSON.stringify(info));
+            } catch (error) {
+                console.error('Error saving distributor info:', error);
+                throw error;
+            }
+        };
+
+        // Main Order Form Component
+        const DistributorOrderForm = () => {
+            const [distributorInfo, setDistributorInfo] = useState(null);
+            const [customerName, setCustomerName] = useState('');
+            const [customerCode, setCustomerCode] = useState('');
+            const [customerEmail, setCustomerEmail] = useState('');
+            const [customerPhone, setCustomerPhone] = useState('');
+            const [customerAddress, setCustomerAddress] = useState('');
+            const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
+            const [deliveryDate, setDeliveryDate] = useState('');
+            const [items, setItems] = useState([]);
+            const [notes, setNotes] = useState('');
+            const [tax, setTax] = useState(0);
+            const [discount, setDiscount] = useState(0);
+            const [showDistributorSetup, setShowDistributorSetup] = useState(false);
+            const [tempDistributorName, setTempDistributorName] = useState('');
+            const [tempDistributorEmail, setTempDistributorEmail] = useState('');
+            const [tempDistributorPhone, setTempDistributorPhone] = useState('');
+            const [tempDistributorAddress, setTempDistributorAddress] = useState('');
+
+            useEffect(() => {
+                const info = getDistributorInfo();
+                if (info) {
+                    setDistributorInfo(info);
+                } else {
+                    setShowDistributorSetup(true);
+                }
+            }, []);
+
+            const calculateSubtotal = () => {
+                return items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+            };
+
+            const calculateTotal = () => {
+                const subtotal = calculateSubtotal();
+                return subtotal + (tax || 0) - (discount || 0);
+            };
+
+            const addItem = () => {
+                const newItem = {
+                    id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    productName: '',
+                    quantity: 1,
+                    unitPrice: 0,
+                    totalPrice: 0,
+                    notes: ''
+                };
+                setItems([...items, newItem]);
+            };
+
+            const removeItem = (itemId) => {
+                setItems(items.filter(item => item.id !== itemId));
+            };
+
+            const updateItem = (itemId, field, value) => {
+                setItems(items.map(item => {
+                    if (item.id === itemId) {
+                        const updated = { ...item, [field]: value };
+                        if (field === 'quantity' || field === 'unitPrice') {
+                            updated.totalPrice = (updated.quantity || 0) * (updated.unitPrice || 0);
+                        }
+                        return updated;
+                    }
+                    return item;
+                }));
+            };
+
+            const handleSaveDraft = () => {
+                if (!customerName.trim()) {
+                    alert('Please enter customer name');
+                    return;
+                }
+
+                const order = {
+                    id: generateOrderId(),
+                    orderNumber: generateOrderNumber(),
+                    customerName: customerName.trim(),
+                    customerCode: customerCode.trim() || undefined,
+                    customerEmail: customerEmail.trim() || undefined,
+                    customerPhone: customerPhone.trim() || undefined,
+                    customerAddress: customerAddress.trim() || undefined,
+                    orderDate,
+                    deliveryDate: deliveryDate || undefined,
+                    items: items.filter(item => item.productName.trim() !== ''),
+                    subtotal: calculateSubtotal(),
+                    tax: tax || undefined,
+                    discount: discount || undefined,
+                    total: calculateTotal(),
+                    status: 'draft',
+                    notes: notes.trim() || undefined,
+                    distributorId: distributorInfo?.id,
+                    distributorName: distributorInfo?.name,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                saveOrder(order);
+                alert('Order saved as draft!');
+            };
+
+            const handleSubmit = () => {
+                if (!customerName.trim()) {
+                    alert('Please enter customer name');
+                    return;
+                }
+
+                if (items.length === 0 || items.every(item => !item.productName.trim())) {
+                    alert('Please add at least one product to the order');
+                    return;
+                }
+
+                const order = {
+                    id: generateOrderId(),
+                    orderNumber: generateOrderNumber(),
+                    customerName: customerName.trim(),
+                    customerCode: customerCode.trim() || undefined,
+                    customerEmail: customerEmail.trim() || undefined,
+                    customerPhone: customerPhone.trim() || undefined,
+                    customerAddress: customerAddress.trim() || undefined,
+                    orderDate,
+                    deliveryDate: deliveryDate || undefined,
+                    items: items.filter(item => item.productName.trim() !== ''),
+                    subtotal: calculateSubtotal(),
+                    tax: tax || undefined,
+                    discount: discount || undefined,
+                    total: calculateTotal(),
+                    status: 'submitted',
+                    notes: notes.trim() || undefined,
+                    distributorId: distributorInfo?.id,
+                    distributorName: distributorInfo?.name,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                saveOrder(order);
+                alert('Order submitted successfully!');
+                
+                // Reset form
+                setCustomerName('');
+                setCustomerCode('');
+                setCustomerEmail('');
+                setCustomerPhone('');
+                setCustomerAddress('');
+                setOrderDate(new Date().toISOString().split('T')[0]);
+                setDeliveryDate('');
+                setItems([]);
+                setNotes('');
+                setTax(0);
+                setDiscount(0);
+            };
+
+            const handleSaveDistributorInfo = () => {
+                if (!tempDistributorName.trim()) {
+                    alert('Please enter distributor name');
+                    return;
+                }
+
+                const info = {
+                    id: distributorInfo?.id || `dist_${Date.now()}`,
+                    name: tempDistributorName.trim(),
+                    email: tempDistributorEmail.trim() || undefined,
+                    phone: tempDistributorPhone.trim() || undefined,
+                    address: tempDistributorAddress.trim() || undefined
+                };
+
+                saveDistributorInfo(info);
+                setDistributorInfo(info);
+                setShowDistributorSetup(false);
+            };
+
+            return (
+                <div style={{
+                    minHeight: '100vh',
+                    background: 'linear-gradient(135deg, #0a0d1a 0%, #161b2e 100%)',
+                    padding: '2rem',
+                    color: '#ffffff'
+                }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                        {/* Header */}
+                        <div style={{
+                            marginBottom: '2rem',
+                            textAlign: 'center',
+                            padding: '2rem',
+                            background: 'rgba(31, 38, 55, 0.6)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(0, 212, 255, 0.2)'
+                        }}>
+                            <h1 style={{
+                                fontSize: '2.5rem',
+                                marginBottom: '0.5rem',
+                                color: '#00d4ff'
+                            }}>
+                                Azure Tobacco - Distributor Order Form
+                            </h1>
+                            {distributorInfo && (
+                                <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem' }}>
+                                    Distributor: {distributorInfo.name}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Distributor Setup Modal */}
+                        {showDistributorSetup && (
+                            <div style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                background: 'rgba(0, 0, 0, 0.8)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 1000,
+                                padding: '2rem'
+                            }}>
+                                <div style={{
+                                    background: 'rgba(31, 38, 55, 0.95)',
+                                    borderRadius: '16px',
+                                    padding: '2rem',
+                                    maxWidth: '500px',
+                                    width: '100%',
+                                    border: '1px solid rgba(0, 212, 255, 0.3)'
+                                }}>
+                                    <h2 style={{ color: '#00d4ff', marginBottom: '1.5rem' }}>
+                                        Distributor Information
+                                    </h2>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                                Distributor Name *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={tempDistributorName}
+                                                onChange={(e) => setTempDistributorName(e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.75rem',
+                                                    background: 'rgba(0, 0, 0, 0.3)',
+                                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                                Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={tempDistributorEmail}
+                                                onChange={(e) => setTempDistributorEmail(e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.75rem',
+                                                    background: 'rgba(0, 0, 0, 0.3)',
+                                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                                Phone
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                value={tempDistributorPhone}
+                                                onChange={(e) => setTempDistributorPhone(e.target.value)}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.75rem',
+                                                    background: 'rgba(0, 0, 0, 0.3)',
+                                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '1rem'
+                                                }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                                Address
+                                            </label>
+                                            <textarea
+                                                value={tempDistributorAddress}
+                                                onChange={(e) => setTempDistributorAddress(e.target.value)}
+                                                rows={3}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '0.75rem',
+                                                    background: 'rgba(0, 0, 0, 0.3)',
+                                                    border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontSize: '1rem',
+                                                    resize: 'vertical'
+                                                }}
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleSaveDistributorInfo}
+                                            style={{
+                                                padding: '0.75rem 1.5rem',
+                                                background: 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                marginTop: '1rem'
+                                            }}
+                                        >
+                                            Save Distributor Info
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Order Form */}
+                        <div style={{
+                            background: 'rgba(31, 38, 55, 0.6)',
+                            borderRadius: '16px',
+                            padding: '2rem',
+                            border: '1px solid rgba(0, 212, 255, 0.2)'
+                        }}>
+                            {/* Customer Information */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h2 style={{
+                                    color: '#00d4ff',
+                                    marginBottom: '1.5rem'
+                                }}>
+                                    Customer Information
+                                </h2>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                    gap: '1rem'
+                                }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Customer Name *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={customerName}
+                                            onChange={(e) => setCustomerName(e.target.value)}
+                                            placeholder="Enter customer name"
+                                            required
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Customer Code
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={customerCode}
+                                            onChange={(e) => setCustomerCode(e.target.value)}
+                                            placeholder="Customer code (optional)"
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={customerEmail}
+                                            onChange={(e) => setCustomerEmail(e.target.value)}
+                                            placeholder="customer@example.com"
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Phone
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={customerPhone}
+                                            onChange={(e) => setCustomerPhone(e.target.value)}
+                                            placeholder="+1234567890"
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ gridColumn: '1 / -1' }}>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Address
+                                        </label>
+                                        <textarea
+                                            value={customerAddress}
+                                            onChange={(e) => setCustomerAddress(e.target.value)}
+                                            placeholder="Customer delivery address"
+                                            rows={2}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem',
+                                                resize: 'vertical'
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Order Dates */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h2 style={{
+                                    color: '#00d4ff',
+                                    marginBottom: '1.5rem'
+                                }}>
+                                    Order Dates
+                                </h2>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                                    gap: '1rem'
+                                }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Order Date *
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={orderDate}
+                                            onChange={(e) => setOrderDate(e.target.value)}
+                                            required
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.8)' }}>
+                                            Delivery Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={deliveryDate}
+                                            onChange={(e) => setDeliveryDate(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '0.75rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '8px',
+                                                color: '#fff',
+                                                fontSize: '1rem'
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Order Items */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '1.5rem'
+                                }}>
+                                    <h2 style={{ color: '#00d4ff' }}>
+                                        Order Items
+                                    </h2>
+                                    <button
+                                        onClick={addItem}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '0.9rem',
+                                            fontWeight: '600',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        + Add Item
+                                    </button>
+                                </div>
+
+                                {items.length === 0 ? (
+                                    <div style={{
+                                        padding: '2rem',
+                                        textAlign: 'center',
+                                        background: 'rgba(0, 0, 0, 0.2)',
+                                        borderRadius: '8px',
+                                        color: 'rgba(255,255,255,0.5)'
+                                    }}>
+                                        No items added. Click "Add Item" to start.
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        {items.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                style={{
+                                                    padding: '1rem',
+                                                    background: 'rgba(0, 0, 0, 0.2)',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid rgba(0, 212, 255, 0.2)'
+                                                }}
+                                            >
+                                                <div style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: '2fr 1fr 1fr 1fr auto',
+                                                    gap: '1rem',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <input
+                                                        type="text"
+                                                        value={item.productName}
+                                                        onChange={(e) => updateItem(item.id, 'productName', e.target.value)}
+                                                        placeholder="Product name"
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            background: 'rgba(0, 0, 0, 0.3)',
+                                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                            borderRadius: '6px',
+                                                            color: '#fff',
+                                                            fontSize: '0.9rem'
+                                                        }}
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        value={item.quantity}
+                                                        onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                                                        placeholder="Qty"
+                                                        min="1"
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            background: 'rgba(0, 0, 0, 0.3)',
+                                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                            borderRadius: '6px',
+                                                            color: '#fff',
+                                                            fontSize: '0.9rem'
+                                                        }}
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        value={item.unitPrice}
+                                                        onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                                                        placeholder="Unit Price"
+                                                        min="0"
+                                                        step="0.01"
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            background: 'rgba(0, 0, 0, 0.3)',
+                                                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                            borderRadius: '6px',
+                                                            color: '#fff',
+                                                            fontSize: '0.9rem'
+                                                        }}
+                                                    />
+                                                    <div style={{
+                                                        padding: '0.5rem',
+                                                        color: '#00d4ff',
+                                                        fontWeight: '600',
+                                                        fontSize: '0.9rem'
+                                                    }}>
+                                                        ${item.totalPrice.toFixed(2)}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => removeItem(item.id)}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            background: 'rgba(244, 67, 54, 0.2)',
+                                                            border: '1px solid rgba(244, 67, 54, 0.5)',
+                                                            borderRadius: '6px',
+                                                            color: '#f44336',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Order Summary */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h2 style={{
+                                    color: '#00d4ff',
+                                    marginBottom: '1.5rem'
+                                }}>
+                                    Order Summary
+                                </h2>
+                                <div style={{
+                                    padding: '1.5rem',
+                                    background: 'rgba(0, 0, 0, 0.2)',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(0, 212, 255, 0.2)'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.8)' }}>Subtotal:</span>
+                                        <span style={{ color: '#fff', fontWeight: '600' }}>${calculateSubtotal().toFixed(2)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.8)' }}>Tax:</span>
+                                        <input
+                                            type="number"
+                                            value={tax}
+                                            onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
+                                            min="0"
+                                            step="0.01"
+                                            style={{
+                                                width: '120px',
+                                                padding: '0.25rem 0.5rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '6px',
+                                                color: '#fff',
+                                                fontSize: '0.9rem',
+                                                textAlign: 'right'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.8)' }}>Discount:</span>
+                                        <input
+                                            type="number"
+                                            value={discount}
+                                            onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                                            min="0"
+                                            step="0.01"
+                                            style={{
+                                                width: '120px',
+                                                padding: '0.25rem 0.5rem',
+                                                background: 'rgba(0, 0, 0, 0.3)',
+                                                border: '1px solid rgba(0, 212, 255, 0.3)',
+                                                borderRadius: '6px',
+                                                color: '#fff',
+                                                fontSize: '0.9rem',
+                                                textAlign: 'right'
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        marginTop: '1rem',
+                                        paddingTop: '1rem',
+                                        borderTop: '2px solid rgba(0, 212, 255, 0.3)'
+                                    }}>
+                                        <span style={{ color: '#00d4ff', fontSize: '1.2rem', fontWeight: '700' }}>Total:</span>
+                                        <span style={{ color: '#00d4ff', fontSize: '1.2rem', fontWeight: '700' }}>
+                                            ${calculateTotal().toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{
+                                    display: 'block',
+                                    marginBottom: '0.5rem',
+                                    color: 'rgba(255,255,255,0.8)',
+                                    fontWeight: '600'
+                                }}>
+                                    Order Notes
+                                </label>
+                                <textarea
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    placeholder="Additional notes or special instructions..."
+                                    rows={4}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.75rem',
+                                        background: 'rgba(0, 0, 0, 0.3)',
+                                        border: '1px solid rgba(0, 212, 255, 0.3)',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '1rem',
+                                        resize: 'vertical'
+                                    }}
+                                />
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '1rem',
+                                justifyContent: 'flex-end',
+                                paddingTop: '1.5rem',
+                                borderTop: '1px solid rgba(0, 212, 255, 0.2)'
+                            }}>
+                                <button
+                                    onClick={handleSaveDraft}
+                                    style={{
+                                        padding: '0.75rem 2rem',
+                                        background: 'rgba(0, 212, 255, 0.2)',
+                                        border: '1px solid rgba(0, 212, 255, 0.5)',
+                                        borderRadius: '8px',
+                                        color: '#00d4ff',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Save Draft
+                                </button>
+                                <button
+                                    onClick={handleSubmit}
+                                    style={{
+                                        padding: '0.75rem 2rem',
+                                        background: 'linear-gradient(135deg, #00d4ff 0%, #4a90a4 100%)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: '#fff',
+                                        fontSize: '1rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Submit Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app using ReactDOM.render (React 17 API)
+        ReactDOM.render(<DistributorOrderForm />, document.getElementById('root'));
+    </script>
+</body>
 </html>
