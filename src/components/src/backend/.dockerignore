@@ -1,15 +1,2 @@
-node_modules
-npm-debug.log
-.env
-.env.local
-.DS_Store
-*.log
-database/*.db-journal
-.git
-.gitignore
-
-
-
-
-
-
+*
+!.gitignore
